@@ -1,6 +1,6 @@
 {
   "name": "Bdtlib",
   "tagline": "Library for Bandit learning routines",
-  "body": "\r\n\r\n### Authors and Contributors\r\nGovind Gopakumar (@govg) and Abhishek Maheswari.\r\n",
+  "body": "### Introduction\r\nCourse [webpage](http://www.cse.iitk.ac.in/users/purushot/courses/opt/2016-17-a/)\r\n\r\nCourse project : Library for bandit learning and optimization\r\n\r\nThe aim shall be to implement popular bandit learning algorithms, and more specifically focus on a usable and correct implementation\r\nof [Thompson Sampling](http://jmlr.csail.mit.edu/proceedings/papers/v28/agrawal13.pdf).\r\n\r\nThis site shall be updated sporadically with project work. \r\n\r\n### Authors and Contributors\r\nGovind Gopakumar (@govg) and Abhishek Maheswari(@abhimahes).\r\n\r\n\r\n",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
