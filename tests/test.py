@@ -93,10 +93,6 @@ for i in range(0, T):
     secondterm = np.matrix(cts) * np.matrix(ucb_t)
     ucb_rewards = firstterm + secondterm
     ucb_arm = np.argmax(ucb_rewards)
-    if np.random.randint(narm) < epsilon*narm:
-        ucb_arm = np.random.randint(narm)
-    else:
-        ucb_arm = ucb_arm
 
     # Update the LinUCB model
     x = np.matrix(cts[ucb_arm, :])

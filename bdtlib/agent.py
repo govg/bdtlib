@@ -48,14 +48,17 @@ class ThompsonSampling():
         self.Binv = np.linalg.inv(self.B)
         self.mu = self.Binv * self.f.transpose()
         return
+    
+    def name(self):
+        return "Thompson Sampling"
 
 
 class LinUCB():
     def __init__(self, alpha, d):
         self.d = d
         self.A = np.matrix(np.identity(d))
-        self.b = np.matrix(np.zeros(d))
-        self.t = np.matrix(np.zeros(d))
+        self.b = np.matrix(np.zeros((d, 1)))
+        self.t = np.matrix(np.zeros((d, 1)))
         self.alpha = alpha
         self.Ainv = np.matrix(np.identity(d))
 
@@ -76,11 +79,14 @@ class LinUCB():
 
     def update(self, context, reward):
         x = np.matrix(context)
-        self.A = self.A + x.tranpose()*x
+        self.A = self.A + x.transpose()*x
         self.b = self.b + (reward*x).transpose()
         self.Ainv = np.linalg.inv(self.A)
         self.t = self.Ainv*self.b
         return
+
+    def name(self):
+        return "LinUCB"
 
 
 class Random():
@@ -98,6 +104,9 @@ class Random():
 
     def update(self, context, reward):
         return
+
+    def name(self):
+        return "Random"
 
 
 class EpsGreedy():
@@ -135,3 +144,6 @@ class EpsGreedy():
         self.Ainv = np.linalg.inv(self.A)
         self.t = self.Ainv*self.b
         return
+
+    def name(self):
+        return "Epsilon Greedy"
