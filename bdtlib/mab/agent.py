@@ -29,10 +29,12 @@ class EpsGreedy():
         return
 
     def choose(self, arms):
-
+        # If we haven't attempted enough arms, we'll blindly
+        # attempt one
         if self.attempts.sum() < self.epsilon * self.narms:
             optarm = np.random.randint(arms.shape[0])
         else:
+            # Attempt the first new arm, or exploit best arm so far
             if np.random.randint(10) < self.epsilon * 10:
                 optarm = np.random.randint(arms.shape[0])
                 for i in range(0, arms.shape[0]):
@@ -45,6 +47,7 @@ class EpsGreedy():
         return arms[optarm]
 
     def update(self, arm, reward):
+        # Update the number of attempts and the mean rewards
         self.attempts[arm] = self.attempts[arm] + 1
         self.means[arm] = self.means[arm] * (self.attempts[arm]-1)
         self.means[arm] = self.means[arm] + reward
@@ -65,8 +68,10 @@ class LinUCB():
         return
 
     def choose(self, arms):
+        # Compute the confidence intervals for all the arms
         confid = np.zeros(arms.shape[0])
         for i in range(0, arms.shape[0]):
+            # We need to play each arm at least once to attempt this
             if self.attempts[arms[i]] == 0:
                 optarm = i
                 return arms[optarm]
@@ -77,6 +82,7 @@ class LinUCB():
         return arms[optarm]
 
     def update(self, arm, reward):
+        # Update the number of attempts and the mean rewards
         self.attempts[arm] = self.attempts[arm] + 1
         self.means[arm] = self.means[arm] * (self.attempts[arm]-1)
         self.means[arm] = self.means[arm] + reward
@@ -89,6 +95,7 @@ class LinUCB():
 
 
 class Random():
+    # Best policy ever
     def __init__(self):
         return
 
