@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.datasets import load_boston
 
-from bdtlib import ThompsonSampling, LinUCB, Random
+from bdtlib.contextual import ThompsonSampling, LinUCB, Random
 
 '''
 boston = load_boston()
