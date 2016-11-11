@@ -10,13 +10,11 @@ Each agent provides the following two methods :
 '''
 
 import numpy as np
-from numpy.random import multivariate_normal
 '''
 Will contain the following policies :
     LinUCB
     Random
     Epsilon Greedy
-
 
 '''
 
@@ -25,8 +23,9 @@ class EpsGreedy():
     def __init__(self, epsilon, d):
         self.epsilon = epsilon
         self.narms = d
-        self.arms = np.zeros(self.narms)
+        self.means = np.zeros(self.narms)
         self.attempts = np.zeros(self.narms)
+        self.total = 0
         return
 
     def choose(self, arms):
@@ -37,13 +36,16 @@ class EpsGreedy():
             if np.random.randint(10) < self.epsilon * 10:
                 optarm = np.random.randint(arms.shape[0])
             else:
-                optarm = np.argmax(self.arms[arms])
+                optarm = np.argmax(self.means[arms])
 
         return arms[optarm]
 
     def update(self, arm, reward):
         self.attempts[arm] = self.attempts[arm] + 1
-        self.arms[arm] = (self.arms[arm] + reward)/self.attempts[arm]
+        self.means[arm] = self.means[arm] * (self.attempts[arm]-1)
+        self.means[arm] = self.means[arm] + reward
+        self.means[arm] = self.means[arm] / self.attempts[arm]
+        self.total = self.total + 1
         return
 
     def name(self):
@@ -51,17 +53,27 @@ class EpsGreedy():
 
 
 class LinUCB():
-    def __init__(self, nu, d):
+    def __init__(self, d):
         self.narms = d
-        self.arms = np.zeros((self.narms, 1))
+        self.means = np.zeros((self.narms, 1))
         self.attempts = np.zeros((self.narms, 1))
+        self.total = 0
         return
 
     def choose(self, arms):
-
-        return
+        confid = np.zeros(arms.shape[0])
+        for i in range(0, arms.shape[0]):
+            confid[i] = (2*np.log(self.total))/self.attempts[arms[i]]
+            confid[i] = np.sqrt(confid[i]) + self.means[arms[i]]
+        optarm = np.argmax(confid)
+        return arms[optarm]
 
     def update(self, arm, reward):
+        self.attempts[arm] = self.attempts[arm] + 1
+        self.means[arm] = self.means[arm] * (self.attempts[arm]-1)
+        self.means[arm] = self.means[arm] + reward
+        self.means[arm] = self.means[arm] / self.attempts[arm]
+        self.total = self.total + 1
         return
 
     def name(self):
@@ -70,7 +82,6 @@ class LinUCB():
 
 class Random():
     def __init__(self):
-
         return
 
     def choose(self, arms):
