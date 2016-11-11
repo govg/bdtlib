@@ -24,14 +24,14 @@ noise = np.random.randint(10, size=(N, 1))
 Y = Y + noise
 
 
-T = 25
+T = 50
 narm = 10
 
 # bandit = ThompsonSampling(0.05, d)
 # bandit = LinUCB(0.5, d)
 # bandit = Random() 
 
-bandits = [ThompsonSampling(0.05, d), LinUCB(0.5, d), Random()]
+bandits = [ThompsonSampling(0.5, d), LinUCB(0.5, d)]
 bnum = 0
 colors = ['red', 'blue', 'green']
 
