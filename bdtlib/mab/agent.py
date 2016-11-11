@@ -31,10 +31,14 @@ class EpsGreedy():
     def choose(self, arms):
 
         if self.attempts.sum() < self.epsilon * self.narms:
-            optarm = arms[np.random.randint(arms.shape[0])]
+            optarm = np.random.randint(arms.shape[0])
         else:
             if np.random.randint(10) < self.epsilon * 10:
                 optarm = np.random.randint(arms.shape[0])
+                for i in range(0, arms.shape[0]):
+                    if self.attempts[arms[i]] == 0:
+                        optarm = i
+                        break
             else:
                 optarm = np.argmax(self.means[arms])
 
@@ -63,8 +67,12 @@ class LinUCB():
     def choose(self, arms):
         confid = np.zeros(arms.shape[0])
         for i in range(0, arms.shape[0]):
-            confid[i] = (2*np.log(self.total))/self.attempts[arms[i]]
-            confid[i] = np.sqrt(confid[i]) + self.means[arms[i]]
+            if self.attempts[arms[i]] == 0:
+                optarm = i
+                return arms[optarm]
+            else:
+                confid[i] = (2*np.log(self.total))/self.attempts[arms[i]]
+                confid[i] = np.sqrt(confid[i]) + self.means[arms[i]]
         optarm = np.argmax(confid)
         return arms[optarm]
 
