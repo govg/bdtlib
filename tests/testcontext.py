@@ -24,7 +24,7 @@ noise = np.random.randint(10, size=(N, 1))
 Y = Y + noise
 
 
-T = 50
+T = 100
 narm = 10
 
 # bandit = ThompsonSampling(0.05, d)

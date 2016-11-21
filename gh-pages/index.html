@@ -28,10 +28,68 @@
 
     <div class="container">
       <section id="main_content">
-        <h3>
-<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+        <h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction</h2>
 
-<p>Govind Gopakumar (<a href="https://github.com/govg" class="user-mention">@govg</a>) and Abhishek Maheswari.</p>
+<p><a href="https://en.wikipedia.org/wiki/Multi-armed_bandit">Multi-Armed Bandit</a> originates from the study of slot machines and optimally playing them. The general scenario is where in an iterative process, an agent chooses from available actions, receives rewards corresponding to his choice, and attempts to maximize the reward he obtains. There are various assumptions that can be made on the actions (does the agent know any side information? can he see what reward he could have obtained with other choices?), which lead to different analysis. </p>
+
+<p>This library implements popular algorithms that try to solve both the normal multi-armed bandits case (where the agent only choose an arm number, and each arm generates a reward distributed about a particular mean) and the contextual multi-armed bandit case (where the agent observes some side information, "context" associated with each arm before the choice is made). </p>
+
+<h3>
+<a id="multi-armed-bandit-without-context" class="anchor" href="#multi-armed-bandit-without-context" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Multi armed bandit without context</h3>
+
+<p>The currently implemented (and tested) algorithms are :</p>
+
+<ul>
+<li>Upper Confidence Bound (UCB)</li>
+<li>Epsilon Greedy</li>
+<li>Random</li>
+</ul>
+
+<p><a href="https://www.cs.mcgill.ca/%7Evkules/bandits.pdf">This</a> gives a nice overview of the various algorithms, including ones that have not been implemented as of yet.</p>
+
+<h3>
+<a id="contextual-multi-armed-bandits" class="anchor" href="#contextual-multi-armed-bandits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contextual multi-armed bandits</h3>
+
+<p>The currently implemented (and tested) algorithms are:</p>
+
+<ul>
+<li><a href="http://jmlr.csail.mit.edu/proceedings/papers/v28/agrawal13.pdf">Thompson Sampling</a></li>
+<li><a href="http://www.research.rutgers.edu/%7Elihong/pub/Li10Contextual.pdf">LinUCB</a></li>
+<li>Epsilon Greedy - Currently in progress</li>
+<li>Random </li>
+</ul>
+
+<p><a href="https://arxiv.org/pdf/1508.03326v2.pdf">This</a> is a nice overview of different algorithms and their analysis with respect to the contextual case.</p>
+
+<p>Two popular datasets (that I will try and work with) that can be used as reference are the following</p>
+
+<ul>
+<li><a href="https://www.kaggle.com/c/avazu-ctr-prediction/data">Avazu CTR</a></li>
+<li><a href="http://www.kddcup2012.org/c/kddcup2012-track2/data">SoSo CTR</a></li>
+</ul>
+
+<p>Note that the (contextual) multi-armed bandit setting lends itself well to modelling online learning, especially for models where the final outcome (click/no click, expected rating) can be expressed as a linear combination of the input features (a'la linear regression). To this, it can be verified that these algorithms quickly converge to a decent linear regressor when used on standard regression datasets (the tests include one that uses the Boston House prices dataset).</p>
+
+<h2>
+<a id="build-and-usage" class="anchor" href="#build-and-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build and usage</h2>
+
+<p>The package has been tested only on Linux (Arch Linux 64bit), but it should work on any Linux distribution without any changes. I don't feel like testing on Windows. Usage is straightforward, drop the bdtlib folder into either your python path, or your local folder (in which case you will have to append that to the python path). Example code can be found in the tests folder, this includes testing all implemented algorithms as well as plotting the results on both the Boston prices dataset, as well as randomly generated linear model with uniform noise.</p>
+
+<p>As this is part of a <a href="http://www.cse.iitk.ac.in/users/purushot/courses/opt/2016-17-a/">course</a> project, I will be developing (making breaking changes to ) it in the coming month, and hopefully over the next few as well. </p>
+
+<h2>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contact</h2>
+
+<p>I can be found using the nick govg on Freenode/Quakenet/Snoonet. </p>
+
+<p>For further details, please go to my <a href="http://home.iitk.ac.in/%7Egovindg">homepage</a> </p>
+
+<p>Govind Gopakumar (<a href="https://github.com/govg" class="user-mention">@govg</a>) </p>
+
+<p>Department of Computer Science and Engineering,</p>
+
+<p>Indian Institute of Technology, Kanpur</p>
       </section>
     </div>
 
