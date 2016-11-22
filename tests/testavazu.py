@@ -53,8 +53,8 @@ Y = Y[totalmask]
 '''
 
 # Load masked Avazu into memory
-X = np.load("../Avazu/X33.npy")
-Y = np.load("../Avazu/Y33.npy")
+X = np.load("../Avazu/X25.npy")
+Y = np.load("../Avazu/Y25.npy")
 
 N = X.shape[0]
 d = X.shape[1]
@@ -63,7 +63,7 @@ print "Loaded data with dims : ", N, " x ", d
 print "Mean of Y array is : ", Y.mean()
 
 # 25 trials
-T = 1000
+T = 10000
 narm = 20
 var = 5
 

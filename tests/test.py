@@ -5,7 +5,7 @@ from sklearn.datasets import load_boston
 from sklearn import linear_model
 from numpy.random import multivariate_normal
 
-
+'''
 boston = load_boston()
 
 X = boston.data
@@ -22,10 +22,9 @@ w = np.random.randint(10, size=(d, 1))
 Y = np.matrix(X)*np.matrix(w)
 noise = np.random.randint(100, size=(N, 1))
 Y = Y + noise
-'''
 
 T = 50
-narm = 25
+narm = 10
 
 # Variables for TS
 B = np.matrix(np.identity(d))
