@@ -17,6 +17,7 @@ Will contain the following policies :
     LinUCB              :   Similar to normal LinUCB rule
     Random              :   Randomly select an arm
     Eps-Greedy          :   Epsilon greedy selection of arm
+    Bootstrap           :   Bootstrap method for arm selection
 
 '''
 
@@ -147,3 +148,24 @@ class EpsGreedy():
 
     def name(self):
         return "Epsilon Greedy"
+
+class Bootstrap():
+    def __init__(self, dim, B=1):
+        self.dim = dim
+        self.B = B
+
+    def choose(self, contexts):
+        narm = contexts.shape[0]
+        arm_feats = np.array((narm, self.dim))
+
+        # Sample arm feature for each arm
+        for k in range(0, narm):
+            arm_feats[k,:] = # Randomly select the feature
+
+
+        # Select the arm          
+
+    def update(self, context, reward):
+
+    def name(self):
+        return "Online Bootstrap"
