@@ -166,9 +166,11 @@ class OnlineBootstrap():
             selected_feature_index = random.randint(0,self.B-1)
             selected_arm_feats[k,:] = self.all_arm_feats[k, selected_feature_index, : ] # Randomly select the feature
 
-
         # Select the arm
+        rewards = np.matrix(contexts)*np.matrix(selected_arm_feats)
+        optarm = np.argmax(rewards)
 
+        return optarm
 
     def update(self, selected_arm, context, reward):
         for j in range(self.B):
