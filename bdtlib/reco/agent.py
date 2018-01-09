@@ -158,7 +158,22 @@ class OnlineBootstrap():
         self.B = B
         self.d = d
         self.narm = narm
-        self.theta_all = np.random.randn(self.narm, self.B, self.d)  # Initialize all arm features 
+
+        mean = np.zeros((self.d))
+        cov = 15*np.identity((self.d))
+
+        self.theta_all = []
+        for i in range(self.narm):
+            thetas = []
+            for j in range(self.B):
+                theta = np.random.multivariate_normal(mean=mean,cov=cov)
+                thetas.append(theta)
+
+            self.theta_all.append(thetas)
+
+        self.theta_all = np.array(self.theta_all)
+
+        # self.theta_all = np.random.randn(self.narm, self.B, self.d)  # Initialize all arm features 
         # print self.theta_all
 
     
@@ -195,7 +210,7 @@ class OnlineBootstrap():
             for z in range(1,p+1):
                 eta = 1.0 / math.sqrt(z+1)
                 # print eta
-                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 100 # derivative of log-likelihood
+                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 1000 # derivative of log-likelihood
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -216,3 +231,91 @@ class OnlineBootstrap():
 
     def name(self):
         return "Online Bootstrap"
+
+
+
+def OnlineCollaborativeBootstrap():
+    def __init__(self, B=1, narm=10, D=10, M=10):     
+        self.B = B
+        self.d = d
+        self.narm = narm
+
+        mean = np.zeros((self.d))
+        cov = 15*np.identity((self.d))
+
+        self.theta_basis = []
+        for i in range(self.M):          
+            theta = np.random.multivariate_normal(mean=mean,cov=cov)
+            self.theta_basis.append(theta)
+
+        self.theta_basis = np.array(self.theta_basis)
+        
+        # print self.theta_all
+
+        mean = np.zeros((self.M))
+        cov = 15*np.identity((self.M))
+
+        self.Z = []
+        for i in range(self.narm):
+            z =  np.random.multivariate_normal(mean=mean,cov=cov)
+            self.Z.append(z)
+
+        self.Z = np.array(self.Z)
+
+        self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
+
+    
+    def choose(self, context): 
+        selected_arm_feats = np.zeros((self.narm, self.d))
+        # print selected_arm_feats.shape
+        # Sample arm feature for each arm
+        # for k in range(self.narm):
+            # selected_feature_index = random.randint(0, self.B-1)
+            # print selected_arm_feats.shape
+            # print self.theta_all.shape
+            # print selected_feature_index
+            # selected_arm_feats[k,:] = self.theta_all[k, selected_feature_index, : ] # Randomly select the feature
+
+        # Select the arm
+        # print context.shape
+        # print selected_arm_feats.shape
+        # exp_rewards = np.matrix(context)*np.transpose(np.matrix(selected_arm_feats))
+        exp_rewards = np.matrix(context)*np.transpose(np.matrix(self.theta_all))        
+        optarm = np.argmax(exp_rewards)
+        self.selected_arm = optarm
+        # print optarm
+        exp_rewards = np.array(exp_rewards)
+
+        # print optarm
+        # print exp_rewards.shape
+
+        return optarm, exp_rewards[0][optarm] 
+
+    def update(self, context, reward, exp_reward):
+        # print "here"
+        for j in range(self.B):
+            p = np.random.poisson(lam=1)
+            for z in range(1,p+1):
+                eta = 1.0 / math.sqrt(z+1)
+                # print eta
+                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 500 # derivative of log-likelihood
+
+        # print "arm pulled : " + str(self.selected_arm)
+        # print self.theta_all
+        # time.sleep(1)
+
+    def get_random_arm(self, context):
+        arm = random.randint(0, self.narm - 1)
+        self.selected_arm = arm 
+
+        r = random.randint(0, self.B - 1)
+        exp_reward = np.array(np.matrix(context)*np.transpose(np.matrix(self.theta_all[arm, r, :])))
+
+        # print exp_reward[0][0]
+        return arm, exp_reward[0][0]
+
+    def get_params(self):
+        return self.theta_all[:,self.B-1,:]
+
+    def name(self):
+        return "Online Collaborative Bootstrap"

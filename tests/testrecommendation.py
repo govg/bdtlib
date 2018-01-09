@@ -11,23 +11,45 @@ from bdtlib.reco import OnlineBootstrap, Random
 
 # Toy data, to play with
 # Context vector is 1-hot depicting the current user
-d = 50
+d = 20
 U = 100
 N = 500000
-K = 50
-X = np.zeros((N,U+d))
-theta_true = np.random.randn(U+d, K)
+K = 2
+X = np.zeros((N,U+d+1))
+# theta_true = np.random.randn(U+d+1, K)
+mean = np.zeros((U+d+1))
+cov = 100*np.identity((U+d+1))
+# print mean.shape
+# print cov.shape
+# sys.exit(0)
+theta_true = []
+
+# print theta.shape
+for i in range(K):
+	theta = np.random.multivariate_normal(mean=mean,cov=cov)
+	theta_true.append(theta)
+
+theta_true = np.array(theta_true).transpose()
+# print theta_true.shape
+# sys.exit(0)
+
+
+
 Y = []
-for i in range(N):
-    user = randint(0, U - 1)
-    X[i][user+d] = 1
-    # x = np.random.randn(1, d)
-    # X[i, : d] = x   
-    true_rating = np.array(np.matrix(X[i,:]) * np.matrix(theta_true)) + np.random.randn(1, K)
-    Y.append(np.squeeze(true_rating))
+
+for i in range(N):	
+	user = randint(0, U - 1)
+	X[i][user+d] = 1
+	x = np.random.randn(1, d)	
+	X[i, : d] = x
+	X[i][U+d] = 1   
+	true_rating = np.array(np.matrix(X[i,:]) * np.matrix(theta_true)) + np.random.randn(1, K)
+	Y.append(np.squeeze(true_rating))
+
 
 Y = np.array(Y)
 # print X
+# sys.exit(0)
 # print theta_true.shape
 # print Y.shape
 # print Y
@@ -46,21 +68,26 @@ T = N
 # narm = 20
 narm = K
 
-# bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d)]
-bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d)]
+bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
+# bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1)]
 
 
 bnum = 0
-colors = ['red', 'blue']
+colors = ['red', 'blue', 'green', 'black']
 
 regret = np.zeros(T, dtype=np.float)
 frob_norm = np.zeros(T+1, dtype=np.float)
+root_T = np.zeros(T, dtype=np.float)
+lin_T = np.zeros(T, dtype=np.float)
 
 for bandit in bandits:
-    f = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
-    frob_norm[0] = f
+    # f = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
+    # frob_norm[0] = f
     # sys.exit()
     for i in range(0, T):
+		root_T[i] = math.sqrt(i)
+		lin_T[i] = i
+
     	# Get context
 		context = X[i,:]
 		# print context
@@ -76,25 +103,30 @@ for bandit in bandits:
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
 				bandit.update(context, Y[i][arm], exp_reward)
-				print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
+				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
+
+				# print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
 				# print opt_arm_in_hindsight, arm, exp_reward, Y[i][arm]
-
-				# if i == 0:
-					# regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
-				# else:
-				regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
-
-			else:
-				arm, exp_reward = bandit.get_random_arm(context)
-				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward)
 
 				if i == 0:
 					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
 				else:
 					regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
-			frob_norm[i+1] = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
+			else:
+				arm, exp_reward = bandit.get_random_arm(context)
+				# exp_reward = bandit.get_exp_reward(context, arm)
+				bandit.update(context, Y[i][arm], exp_reward)
+				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
+
+				if i == 0:
+					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
+				else:
+					regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
+
+			# frob_norm[i+1] = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
+			# root_T[i] = 2000*math.sqrt(i)
+			# lin_T[i] = i
 
 		else:
 			arm = bandit.choose()
@@ -106,17 +138,57 @@ for bandit in bandits:
 			else:
 				regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
+			# print i, opt_arm_in_hindsight, arm, Y[i][arm], Y[i][opt_arm_in_hindsight]
+
+
+
+
+    # print regret
+    # print lin_T
+    # print regret - lin_T
+    curcolor = colors[bnum]
+    plt.figure(0)
+    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name() + '1')
+    plt.legend()
+    bnum = (bnum + 1) % 4
 
     curcolor = colors[bnum]
-    plt.figure(1)
-    plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name())
+    plt.figure(0)
+    plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name() + '2')
     plt.legend()
-    bnum = bnum + 1
+    bnum = (bnum + 1) % 4
 
-    curcolor = colors[bnum]
-    plt.figure(2)
-    plt.plot(np.arange(T+1), frob_norm, color=curcolor, label='frob_norm')
-    plt.legend()
+    # sys.exit(0)
+    # curcolor = colors[bnum]
+    # # plt.figure(bnum)
+    # plt.plot(np.arange(T), root_T, color=curcolor, label='root T')
+    # plt.legend()
+    # bnum = (bnum + 1) % 4
+
+    # curcolor = colors[bnum]
+    # # plt.figure(bnum)
+    # plt.plot(np.arange(T), lin_T, color=curcolor, label='T')
+    # plt.legend()
+    # bnum = (bnum + 1) % 4
+
+    # curcolor = colors[bnum]
+    # plt.figure(bnum)
+    # plt.plot(np.arange(T+1), frob_norm, color=curcolor, label='frob_norm')
+    # plt.legend()
+    # bnum = (bnum + 1) % 4
+
+    
+# curcolor = colors[bnum]
+# # plt.figure(bnum)
+# plt.plot(np.arange(T), root_T, color=curcolor, label='root T')
+# plt.legend()
+# bnum = (bnum + 1) % 4
+
+# curcolor = colors[bnum]
+# # plt.figure(bnum)
+# plt.plot(np.arange(T), lin_T, color=curcolor, label='T')
+# plt.legend()
+# bnum = (bnum + 1) % 4
 
 plt.show()
 
