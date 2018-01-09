@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 
 
 sys.path.append('../bdtlib')
-from bdtlib.reco import OnlineBootstrap, Random
+from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
 
 
 # Toy data, to play with
 # Context vector is 1-hot depicting the current user
-d = 20
+d = 0
 U = 100
-N = 500000
-K = 2
+N = 10000
+K = 4
 X = np.zeros((N,U+d+1))
 # theta_true = np.random.randn(U+d+1, K)
 mean = np.zeros((U+d+1))
@@ -68,8 +68,11 @@ T = N
 # narm = 20
 narm = K
 
-bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
+# bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
 # bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1)]
+# bandits = [OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
+bandits = [Random(narm=narm), OnlineBootstrap(B=1, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
+
 
 
 bnum = 0
@@ -98,14 +101,14 @@ for bandit in bandits:
 
 		# print "opt arm : " + str(opt_arm_in_hindsight)
 
-		if bandit.name() == "Online Bootstrap":
+		if bandit.name() == "Online Bootstrap" or bandit.name() == "Online Collaborative Bootstrap":
 			if i >= 300:		
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
 				bandit.update(context, Y[i][arm], exp_reward)
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
-				# print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
+				print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
 				# print opt_arm_in_hindsight, arm, exp_reward, Y[i][arm]
 
 				if i == 0:
@@ -148,15 +151,15 @@ for bandit in bandits:
     # print regret - lin_T
     curcolor = colors[bnum]
     plt.figure(0)
-    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name() + '1')
+    plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name() + '1')
     plt.legend()
     bnum = (bnum + 1) % 4
 
-    curcolor = colors[bnum]
-    plt.figure(0)
-    plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name() + '2')
-    plt.legend()
-    bnum = (bnum + 1) % 4
+    # curcolor = colors[bnum]
+    # plt.figure(0)
+    # plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name() + '2')
+    # plt.legend()
+    # bnum = (bnum + 1) % 4
 
     # sys.exit(0)
     # curcolor = colors[bnum]

@@ -210,7 +210,7 @@ class OnlineBootstrap():
             for z in range(1,p+1):
                 eta = 1.0 / math.sqrt(z+1)
                 # print eta
-                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 1000 # derivative of log-likelihood
+                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 500 # derivative of log-likelihood
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -234,14 +234,15 @@ class OnlineBootstrap():
 
 
 
-def OnlineCollaborativeBootstrap():
+class OnlineCollaborativeBootstrap():
     def __init__(self, B=1, narm=10, D=10, M=10):     
         self.B = B
-        self.d = d
+        self.D = D
+        self.M = M
         self.narm = narm
 
-        mean = np.zeros((self.d))
-        cov = 15*np.identity((self.d))
+        mean = np.zeros((self.D))
+        cov = 15*np.identity((self.D))
 
         self.theta_basis = []
         for i in range(self.M):          
@@ -266,7 +267,7 @@ def OnlineCollaborativeBootstrap():
 
     
     def choose(self, context): 
-        selected_arm_feats = np.zeros((self.narm, self.d))
+        selected_arm_feats = np.zeros((self.narm, self.D))
         # print selected_arm_feats.shape
         # Sample arm feature for each arm
         # for k in range(self.narm):
@@ -292,24 +293,37 @@ def OnlineCollaborativeBootstrap():
         return optarm, exp_rewards[0][optarm] 
 
     def update(self, context, reward, exp_reward):
-        # print "here"
-        for j in range(self.B):
-            p = np.random.poisson(lam=1)
-            for z in range(1,p+1):
-                eta = 1.0 / math.sqrt(z+1)
-                # print eta
-                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 500 # derivative of log-likelihood
+        self.update_Z(context, reward, exp_reward)
+        self.update_theta(context, reward, exp_reward)
+        self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
-        # print "arm pulled : " + str(self.selected_arm)
-        # print self.theta_all
-        # time.sleep(1)
+    def update_Z(self, context, reward, exp_reward):
+        eta = 0.000005
+        modified_context = np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context)))
+        # print modified_context.shape
+        # print self.Z[self.selected_arm, : ].shape
+        # print reward
+        # print exp_reward
+        self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
+
+    def update_theta(self, context, reward, exp_reward):
+        for i in range(self.M):
+            eta = 0.000005
+            modified_context = self.Z[self.selected_arm][i]*context
+            exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
+            # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
+            pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())
+            # print self.theta_basis[i, : ].shape
+            # print np.array(modified_context).shape
+            self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
+
 
     def get_random_arm(self, context):
         arm = random.randint(0, self.narm - 1)
         self.selected_arm = arm 
 
         r = random.randint(0, self.B - 1)
-        exp_reward = np.array(np.matrix(context)*np.transpose(np.matrix(self.theta_all[arm, r, :])))
+        exp_reward = np.array(np.matrix(context)*np.transpose(np.matrix(self.theta_all[arm, :])))
 
         # print exp_reward[0][0]
         return arm, exp_reward[0][0]
