@@ -13,7 +13,7 @@ from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
 # Context vector is 1-hot depicting the current user
 d = 0
 U = 100
-N = 10000
+N = 100000
 K = 4
 X = np.zeros((N,U+d+1))
 # theta_true = np.random.randn(U+d+1, K)
@@ -71,7 +71,7 @@ narm = K
 # bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
 # bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1)]
 # bandits = [OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
-bandits = [Random(narm=narm), OnlineBootstrap(B=1, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
+bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
 
 
 
@@ -88,8 +88,8 @@ for bandit in bandits:
     # frob_norm[0] = f
     # sys.exit()
     for i in range(0, T):
-		root_T[i] = math.sqrt(i)
-		lin_T[i] = i
+		root_T[i] = 1000*math.sqrt(i)
+		lin_T[i] = 10*i
 
     	# Get context
 		context = X[i,:]
@@ -155,11 +155,11 @@ for bandit in bandits:
     plt.legend()
     bnum = (bnum + 1) % 4
 
-    # curcolor = colors[bnum]
-    # plt.figure(0)
-    # plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name() + '2')
-    # plt.legend()
-    # bnum = (bnum + 1) % 4
+    curcolor = colors[bnum]
+    plt.figure(1)
+    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name() + '2')
+    plt.legend()
+    bnum = (bnum + 1) % 4
 
     # sys.exit(0)
     # curcolor = colors[bnum]

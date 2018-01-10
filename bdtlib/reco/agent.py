@@ -210,7 +210,7 @@ class OnlineBootstrap():
             for z in range(1,p+1):
                 eta = 1.0 / math.sqrt(z+1)
                 # print eta
-                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 500 # derivative of log-likelihood
+                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 700 # derivative of log-likelihood
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -298,7 +298,7 @@ class OnlineCollaborativeBootstrap():
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward):
-        eta = 0.000005
+        eta = 0.0001
         modified_context = np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context)))
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
@@ -308,7 +308,7 @@ class OnlineCollaborativeBootstrap():
 
     def update_theta(self, context, reward, exp_reward):
         for i in range(self.M):
-            eta = 0.000005
+            eta = 0.0001
             modified_context = self.Z[self.selected_arm][i]*context
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
