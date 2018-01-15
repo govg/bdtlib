@@ -91,7 +91,7 @@ for bandit in bandits:
 	filename_read = '../data/ml-1m/ratings_time.dat'
 	fp = open(filename_read, 'r')
 	line = fp.readline()
-
+	f = open(bandit.name()+'.txt',w)
 	while line:
 		temp = line.strip('\n').split('::')
 		user_id = int(temp[0])
@@ -116,8 +116,9 @@ for bandit in bandits:
 		cum_reward += true_rating
 		T += 1
 
-		print user_id, movie_id, true_rating, exp_reward, float(cum_reward / T), n
-		ratio.append(float(cum_reward / T))
+		print user_id, movie_id, true_rating, exp_reward, float(1.0*cum_reward / T), n, timestamp
+		ratio.append(float(1.0*cum_reward / T))
+		f.write(str(cum_reward) + ' ' + str(T) + ' ' + str(float(1.0*cum_reward / T)) + '\n')
 		
 
 	ratio = np.array(ratio)
