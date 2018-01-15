@@ -8,6 +8,7 @@ Each agent provides the following two methods :
                     and the reward
 '''
 
+import random
 import numpy as np
 from numpy.random import multivariate_normal
 '''
@@ -17,6 +18,7 @@ Will contain the following policies :
     LinUCB              :   Similar to normal LinUCB rule
     Random              :   Randomly select an arm
     Eps-Greedy          :   Epsilon greedy selection of arm
+    Bootstrap           :   Bootstrap method for arm selection
 
 '''
 
@@ -147,3 +149,37 @@ class EpsGreedy():
 
     def name(self):
         return "Epsilon Greedy"
+
+class OnlineBootstrap():
+    def __init__(self, B=1, narm=10, d=10):     
+        self.B = B
+        self.d = d
+        self.narm = narm
+        self.all_arm_feats = np.random.randn(self.narm, self.B, self.d)  # Initialize all arm features 
+
+    
+    def choose(self, contexts): 
+        selected_arm_feats = np.array((narm, self.d))
+
+        # Sample arm feature for each arm
+        for k in range(self.narm):
+            selected_feature_index = random.randint(0,self.B-1)
+            selected_arm_feats[k,:] = self.all_arm_feats[k, selected_feature_index, : ] # Randomly select the feature
+
+        # Select the arm
+        rewards = np.matrix(contexts)*np.matrix(selected_arm_feats)
+        optarm = np.argmax(rewards)
+
+        return optarm
+
+    def update(self, selected_arm, context, reward):
+        for j in range(self.B):
+            p = np.random.poisson(lam=1)
+            for z in range(1,p+1):
+                eta = 1.0 / (math.sqrt(z)+1)
+                self.all_arm_feats[selected_arm, j , :] += eta* # derivative of log-likelihood
+
+
+
+    def name(self):
+        return "Online Bootstrap"

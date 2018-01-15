@@ -1,8 +1,10 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.datasets import load_boston
 
+sys.path.append('../bdtlib')
 from bdtlib.contextual import ThompsonSampling, LinUCB, Random
 
 '''
