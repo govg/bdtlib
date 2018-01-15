@@ -160,7 +160,7 @@ class OnlineBootstrap():
         self.narm = narm
 
         mean = np.zeros((self.d))
-        cov = 15*np.identity((self.d))
+        cov = 20*np.identity((self.d))
 
         self.theta_all = []
         for i in range(self.narm):
@@ -242,8 +242,8 @@ class OnlineCollaborativeBootstrap():
         self.narm = narm
 
         mean = np.zeros((self.D))
-        cov = 15*np.identity((self.D))
-
+        cov = 20*np.identity((self.D))
+      
         self.theta_basis = []
         for i in range(self.M):          
             theta = np.random.multivariate_normal(mean=mean,cov=cov)
@@ -254,8 +254,8 @@ class OnlineCollaborativeBootstrap():
         # print self.theta_all
 
         mean = np.zeros((self.M))
-        cov = 15*np.identity((self.M))
-
+        cov = 20*np.identity((self.M))
+     
         self.Z = []
         for i in range(self.narm):
             z =  np.random.multivariate_normal(mean=mean,cov=cov)
@@ -264,7 +264,7 @@ class OnlineCollaborativeBootstrap():
         self.Z = np.array(self.Z)
 
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
-
+        
     
     def choose(self, context): 
         selected_arm_feats = np.zeros((self.narm, self.D))
@@ -298,7 +298,7 @@ class OnlineCollaborativeBootstrap():
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward):
-        eta = 0.0001
+        eta = 0.00005
         modified_context = np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context)))
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
@@ -308,7 +308,7 @@ class OnlineCollaborativeBootstrap():
 
     def update_theta(self, context, reward, exp_reward):
         for i in range(self.M):
-            eta = 0.0001
+            eta = 0.00005
             modified_context = self.Z[self.selected_arm][i]*context
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
