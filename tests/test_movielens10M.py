@@ -4,91 +4,90 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sys.path.append('../../bdtlib')
-from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
+from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, LinUCB, Random
 
-def create_context_vector(user_id, user_attribute, d):
+def create_context_vector(user_id, timestamp, d):
 	vec_len = d
 	vec = np.zeros(vec_len)
 
-	gender = user_attribute[0]
-	age = user_attribute[1]
-	occupation = user_attribute[2]
-	timestamp = user_attribute[3]
+	# gender = user_attribute[0]
+	# age = user_attribute[1]
+	# occupation = user_attribute[2]
+	# timestamp = user_attribute[3]
 
 	# print user_id, gender, age, occupation, timestamp
 	index = 0
 
 	user_id_bin = bin(user_id)[2:]
 	len_bin = len(user_id_bin)
-	index = 13 - len_bin
+	index = 17 - len_bin
 	for i in range(len(user_id_bin)):
 		vec[index] = int(user_id_bin[i])
 		index += 1
 
 	timestamp_bin = bin(timestamp)[2:]
 	len_bin = len(timestamp_bin)
-	index += (30 - len_bin)
+	index += (31 - len_bin)
 	for i in range(len(timestamp_bin)):
 		vec[index] = int(timestamp_bin[i])
 		index += 1
 
 	return vec
 
-def create_user_attribute_mapping():
-	filename_read = '../data/ml-1m/users.dat'
-	fp = open(filename_read, 'r')
-	mapping = {}
+# def create_user_attribute_mapping():
+# 	filename_read = '../data/ml-1m/users.dat'
+# 	fp = open(filename_read, 'r')
+# 	mapping = {}
 
-	line = fp.readline()
-	while line:
-		temp = line.strip('\n').split('::')
-		user_id = int(temp[0])
-		mapping[user_id] = []
-		mapping[user_id].append(temp[1])
-		mapping[user_id].append(int(temp[2]))
-		mapping[user_id].append(int(temp[3]))
+# 	line = fp.readline()
+# 	while line:
+# 		temp = line.strip('\n').split('::')
+# 		user_id = int(temp[0])
+# 		mapping[user_id] = []
+# 		mapping[user_id].append(temp[1])
+# 		mapping[user_id].append(int(temp[2]))
+# 		mapping[user_id].append(int(temp[3]))
 
-		line = fp.readline()
+# 		line = fp.readline()
 
-	return mapping
+# 	return mapping
 
-user_attribute_mapping = create_user_attribute_mapping()
+# user_attribute_mapping = create_user_attribute_mapping()
 
-d = 55
-K = 3952
-bandits = [OnlineBootstrap(B=1, narm=K, d=d), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/10)), Random(narm=K) ]
+d = 48
+K = 10681
+bandits = [Random(narm=K), OnlineBootstrap(B=1, narm=K, d=d), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/50))]
 # bandits = [Random(narm=K), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/15))]
 
 # bandit = OnlineBootstrap(B=1, narm=K, d=d)
 bnum = 0
 colors = ['red', 'red', 'red', 'blue', 'blue', 'blue']
 
-
-cum_reward = 0
-T = 0
-n = 0
 for bandit in bandits:
 	print bandit.name()
 	ratio = []
+	T = 0
+	n = 0
+	cum_reward = 0
 	filename_read = '../data/ml-10M100K/ratings_time.dat'
 	fp = open(filename_read, 'r')
 	line = fp.readline()
-	f = open(bandit.name()+'.txt', 'w')
+	f = open(bandit.name()+'_movielens10M.txt', 'w')
 	while line:
 		temp = line.strip('\n').split('::')
 		user_id = int(temp[0])
 		movie_id = int(temp[1])
-		true_rating = int(temp[2])
+		true_rating = float(temp[2])
 		timestamp = int(temp[3])
 		line = fp.readline()
 		n += 1
 
-		gender = user_attribute_mapping[user_id][0]
-		age = user_attribute_mapping[user_id][1]
-		occupation = user_attribute_mapping[user_id][2]
+		# gender = user_attribute_mapping[user_id][0]
+		# age = user_attribute_mapping[user_id][1]
+		# occupation = user_attribute_mapping[user_id][2]
 
-		user_attribute = [gender, age, occupation, timestamp]
-		context = create_context_vector(user_id, user_attribute, d)
+		# user_attribute = [gender, age, occupation, timestamp]
+		context = create_context_vector(user_id, timestamp, d)
 		
 		arm, exp_reward = bandit.choose(context)
 		if arm != movie_id - 1:
@@ -98,7 +97,7 @@ for bandit in bandits:
 		cum_reward += true_rating
 		T += 1
 
-		print user_id, movie_id, true_rating, exp_reward, float(1.0*cum_reward / T), n, timestamp
+		print user_id, movie_id, true_rating, exp_reward, float(1.0*cum_reward / T), T, n, timestamp
 		ratio.append(float(1.0*cum_reward / T))
 		f.write(str(cum_reward) + ' ' + str(T) + ' ' + str(float(1.0*cum_reward / T)) + '\n')
 		

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sys.path.append('../../bdtlib')
-from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
+from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, LinUCB, Random
 
 def create_context_vector(user_id, user_attribute, d):
 	vec_len = d
@@ -74,24 +74,24 @@ user_attribute_mapping = create_user_attribute_mapping()
 
 d = 55
 K = 3952
-bandits = [OnlineBootstrap(B=1, narm=K, d=d), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/10)), Random(narm=K) ]
+# bandits = [LinUCB(alpha=25,d=d,sigma=10,narm=K)]
+bandits = [Random(narm=K), OnlineBootstrap(B=1, narm=K, d=d), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/10)) ]
 # bandits = [Random(narm=K), OnlineCollaborativeBootstrap(B=1, narm=K, D=d, M=int(K/15))]
-
+# bandits = [Random(narm=K), OnlineBootstrap(B=1, narm=K, d=d)]
 # bandit = OnlineBootstrap(B=1, narm=K, d=d)
 bnum = 0
 colors = ['red', 'red', 'red', 'blue', 'blue', 'blue']
 
-
-cum_reward = 0
-T = 0
-n = 0
 for bandit in bandits:
 	print bandit.name()
 	ratio = []
+	cum_reward = 0
+	T = 0
+	n = 0
 	filename_read = '../data/ml-1m/ratings_time.dat'
 	fp = open(filename_read, 'r')
 	line = fp.readline()
-	f = open(bandit.name()+'.txt', 'w')
+	f = open(bandit.name()+'_movielens1M.txt', 'w')
 	while line:
 		temp = line.strip('\n').split('::')
 		user_id = int(temp[0])
