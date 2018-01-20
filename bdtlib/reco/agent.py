@@ -12,6 +12,8 @@ import math
 import random
 import numpy as np
 from numpy.random import multivariate_normal
+from Derivative import derivative_real, derivative_binary
+
 '''
 Will contain the following policies :   
     Thompson Sampling   :   Updates using Bayes rule, generates weight
@@ -57,35 +59,46 @@ class ThompsonSampling():
 
 
 class LinUCB():
-    def __init__(self, alpha, d):
+    def __init__(self, alpha, d, sigma=5, narm=10):
         self.d = d
-        self.A = np.matrix(np.identity(d))
-        self.b = np.matrix(np.zeros((d, 1)))
-        self.t = np.matrix(np.zeros((d, 1)))
+        self.sigma_sq = sigma**2
+        self.narm = narm
+        self.A = []
+        for i in range(narm):
+            temp = np.matrix(np.identity(d))          
+            self.A.append(temp)            
+
+        self.A = np.array(self.A)                  # K Identity Matrices
+        self.b = np.matrix(np.random.randn(narm, d))     # K 'b' vectors
+
         self.alpha = alpha
-        self.Ainv = np.matrix(np.identity(d))
+             
+    def choose(self, context):
+        context = np.matrix(context).transpose()
 
-    def choose(self, contexts):
-        narm = contexts.shape[0]
-        first = np.zeros((narm, 1))
+        ucb = np.zeros(self.narm)
+        for i in range(self.narm):
+            A = np.matrix(self.A[i,:,:])
+            b = np.matrix(self.b[i,:]).transpose()
+            Ainv = np.linalg.inv(A)
 
-        for k in range(0, narm):
-            Xk = np.matrix(contexts[k, :])
-            first[k, 0] = Xk * self.Ainv * Xk.transpose()
+            mu = Ainv * b
+            sig = Ainv * self.sigma_sq
 
-        first = np.sqrt(first) * self.alpha
-        second = np.matrix(contexts) * np.matrix(self.t)
-        rewards = first + second
-        optarm = np.argmax(rewards)
+            ucb[i] = int((mu.transpose() * context) + self.alpha*(np.sqrt(mu.transpose()*sig*mu))) 
 
-        return optarm
+        # print self.narm - np.count_nonzero(ucb)
+        optarm = np.argmax(ucb)
+        self.selected_arm = optarm
+        exp_rewards = np.array(ucb)
 
-    def update(self, context, reward):
-        x = np.matrix(context)
-        self.A = self.A + x.transpose()*x
-        self.b = self.b + (reward*x).transpose()
-        self.Ainv = np.linalg.inv(self.A)
-        self.t = self.Ainv*self.b
+        return optarm, exp_rewards[optarm] 
+
+    def update(self, context, reward, exp_reward):
+        x = np.matrix(context).transpose()
+        self.A[self.selected_arm,:,:] += x*x.transpose()
+        self.b[self.selected_arm,:] += reward*x
+
         return
 
     def name(self):
@@ -138,15 +151,15 @@ class Random():
         self.narm = narm
         # self.flag = flag
 
-    def choose(self):
+    def choose(self, context):
         # N = contexts.shape[0]
         # if self.flag:
         optarm = random.randint(0, self.narm - 1)
         # else:
             # optarm = self.arm
-        return optarm
+        return optarm, 0
 
-    def update(self, context, reward):
+    def update(self, context, reward, exp_reward):
         return
 
     def name(self):
@@ -160,7 +173,7 @@ class OnlineBootstrap():
         self.narm = narm
 
         mean = np.zeros((self.d))
-        cov = 20*np.identity((self.d))
+        cov = 15*np.identity((self.d))
 
         self.theta_all = []
         for i in range(self.narm):
@@ -203,14 +216,18 @@ class OnlineBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward):
+    def update(self, context, reward, exp_reward, reward_type):
         # print "here"
         for j in range(self.B):
             p = np.random.poisson(lam=1)
             for z in range(1,p+1):
                 eta = 1.0 / math.sqrt(z+1)
                 # print eta
-                self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 700 # derivative of log-likelihood
+                # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
+                if reward_type == "real":
+                    self.theta_all[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, context, factor)
+                else:
+                    self.theta_all[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, context, factor)
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -292,30 +309,40 @@ class OnlineCollaborativeBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward):
+    def update(self, context, reward, exp_reward, reward_type):
         self.update_Z(context, reward, exp_reward)
         self.update_theta(context, reward, exp_reward)
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward):
-        eta = 0.00005
+        eta = 0.000002
         modified_context = np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context)))
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
         # print reward
         # print exp_reward
-        self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
+        # self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
+        if reward_type == "real":
+            self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
+        else:
+            self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+
 
     def update_theta(self, context, reward, exp_reward):
         for i in range(self.M):
-            eta = 0.00005
+            eta = 0.000002
             modified_context = self.Z[self.selected_arm][i]*context
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
             pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())
             # print self.theta_basis[i, : ].shape
             # print np.array(modified_context).shape
-            self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
+            # self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
+            if reward_type == "real":
+                self.Z[self.selected_arm, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+            else:
+                self.Z[self.selected_arm, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+            
 
 
     def get_random_arm(self, context):
