@@ -159,7 +159,7 @@ class Random():
             # optarm = self.arm
         return optarm, 0
 
-    def update(self, context, reward, exp_reward):
+    def update(self, context, reward, exp_reward, reward_type, factor):
         return
 
     def name(self):
@@ -216,7 +216,7 @@ class OnlineBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward, reward_type):
+    def update(self, context, reward, exp_reward, reward_type, factor):
         # print "here"
         for j in range(self.B):
             p = np.random.poisson(lam=1)
@@ -309,14 +309,14 @@ class OnlineCollaborativeBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward, reward_type):
-        self.update_Z(context, reward, exp_reward)
-        self.update_theta(context, reward, exp_reward)
+    def update(self, context, reward, exp_reward, reward_type, factor):
+        self.update_Z(context, reward, exp_reward, reward_type, factor)
+        self.update_theta(context, reward, exp_reward, reward_type, factor)
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
-    def update_Z(self, context, reward, exp_reward):
+    def update_Z(self, context, reward, exp_reward, reward_type, factor):
         eta = 0.000002
-        modified_context = np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context)))
+        modified_context = np.squeeze(np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context))))
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
         # print reward
@@ -328,10 +328,10 @@ class OnlineCollaborativeBootstrap():
             self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
 
 
-    def update_theta(self, context, reward, exp_reward):
+    def update_theta(self, context, reward, exp_reward, reward_type, factor):
         for i in range(self.M):
             eta = 0.000002
-            modified_context = self.Z[self.selected_arm][i]*context
+            modified_context = np.array(self.Z[self.selected_arm][i]*context)
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
             pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())

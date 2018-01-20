@@ -12,7 +12,7 @@ from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
 # Context vector is 1-hot depicting the current user
 d = 0
 U = 200
-N = 500000
+N = 50000
 K = 20
 X = np.zeros((N,U+d+1))
 # theta_true = np.random.randn(U+d+1, K)
@@ -76,7 +76,8 @@ bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1), OnlineCollaborativeBootstra
 
 bnum = 0
 colors = ['red', 'red', 'red', 'blue', 'blue', 'blue']
-
+reward_type = "real"
+factor = 500
 regret = np.zeros(T, dtype=np.float)
 frob_norm = np.zeros(T+1, dtype=np.float)
 root_T = np.zeros(T, dtype=np.float)
@@ -104,7 +105,7 @@ for bandit in bandits:
 			if i >= 300:		
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
-				bandit.update(context, Y[i][arm], exp_reward)
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
@@ -118,7 +119,7 @@ for bandit in bandits:
 			else:
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward)
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				if i == 0:
@@ -133,7 +134,7 @@ for bandit in bandits:
 		else:
 			arm = bandit.choose()
 			reward = -1
-			bandit.update(context, reward)
+			bandit.update(context, reward, exp_reward, reward_type, factor)
 
 			if i == 0:
 					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
