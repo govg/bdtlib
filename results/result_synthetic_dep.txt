@@ -1,0 +1,3 @@
+Random regret = 17186145.846
+Online Bootstrap regret = 7289855.11729
+Online Collaborative Bootstrap regret = 4847431.7721

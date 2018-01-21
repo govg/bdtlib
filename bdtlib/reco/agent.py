@@ -315,8 +315,9 @@ class OnlineCollaborativeBootstrap():
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward, reward_type, factor):
-        eta = 0.00002
+        eta = 0.0008
         modified_context = np.squeeze(np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context))))
+        # print np.transpose(np.matrix(context)).shape
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
         # print reward
@@ -330,7 +331,7 @@ class OnlineCollaborativeBootstrap():
 
     def update_theta(self, context, reward, exp_reward, reward_type, factor):
         for i in range(self.M):
-            eta = 0.00002
+            eta = 0.0008
             modified_context = np.array(self.Z[self.selected_arm][i]*context)
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
@@ -339,11 +340,11 @@ class OnlineCollaborativeBootstrap():
             # print np.array(modified_context).shape
             # self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
             if reward_type == "real":
-                print self.Z[self.selected_arm, : ].shape
-                print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape
-                self.Z[self.selected_arm, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+                # print self.Z[self.selected_arm, : ].shape
+                # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
+                self.theta_basis[i, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
             else:
-                self.Z[self.selected_arm, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+                self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
             
 
 

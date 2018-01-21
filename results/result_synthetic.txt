@@ -1,0 +1,48 @@
+Random regret = 2143623.4459
+Online Bootstrap regret = 481982.673381
+Online Collaborative Bootstrap regret = 1538925.24921
+Random regret = 2135065.45476
+Online Bootstrap regret = 517727.557147
+Online Collaborative Bootstrap regret = 1311124.88725
+Random regret = 2143915.53868
+Online Bootstrap regret = 381534.215234
+Online Collaborative Bootstrap regret = 1212776.33323
+Random regret = 2143819.37135
+Online Bootstrap regret = 393912.803063
+Online Collaborative Bootstrap regret = 347672.874476
+Random regret = 2143017.13191
+Online Bootstrap regret = 1159708.22812
+Online Collaborative Bootstrap regret = 969043.585136
+Random regret = 2145347.2137
+Online Bootstrap regret = 296889.735686
+Online Collaborative Bootstrap regret = 991944.196698
+Random regret = 2147949.45636
+Online Bootstrap regret = 367081.756696
+Online Collaborative Bootstrap regret = 277760.534227
+Random regret = 2145214.89878
+Online Bootstrap regret = 323222.644721
+Online Collaborative Bootstrap regret = 288366.361201
+Random regret = 2140635.55341
+Online Bootstrap regret = 257450.71348
+Online Collaborative Bootstrap regret = 297185.053915
+Random regret = 2153603.55852
+Online Bootstrap regret = 290037.366668
+Online Collaborative Bootstrap regret = 404293.668894
+Random regret = 2144435.46507
+Online Bootstrap regret = 335999.62763
+Online Collaborative Bootstrap regret = 339843.110182
+Random regret = 2146456.6928
+Online Bootstrap regret = 314496.835557
+Online Collaborative Bootstrap regret = 1148128.90327
+Random regret = 2145934.17472
+Online Bootstrap regret = 284311.323279
+Online Collaborative Bootstrap regret = 327417.932971
+Random regret = 2149890.4311
+Online Bootstrap regret = 321537.155869		factor = 100
+Online Collaborative Bootstrap regret = 313479.519776	factor = 1, eta = 0.0008
+Random regret = 2144362.1025
+Online Bootstrap regret = 406611.266814
+Online Collaborative Bootstrap regret = 954903.105209
+Random regret = 2145584.17196
+Online Bootstrap regret = 275532.404383		factor = 100
+Online Collaborative Bootstrap regret = 279630.683888	factor = 0.9, eta = 0.0008

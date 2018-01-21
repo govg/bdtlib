@@ -2,6 +2,7 @@ import sys
 import math
 import numpy as np
 from random import randint
+import create_syntheticdata
 import matplotlib.pyplot as plt
 
 sys.path.append('../bdtlib')
@@ -11,51 +12,30 @@ from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
 # Toy data, to play with
 # Context vector is 1-hot depicting the current user
 d = 0
-U = 200
+U = 150
 N = 50000
-K = 20
-X = np.zeros((N,U+d+1))
-# theta_true = np.random.randn(U+d+1, K)
-mean = np.zeros((U+d+1))
-cov = 100*np.identity((U+d+1))
-# print mean.shape
-# print cov.shape
-# sys.exit(0)
-theta_true = []
+K = 100
+M = 20
+filename_context = 'cleaned_data/contexts_synthetic_real_dep'
+filename_rating = 'cleaned_data/ratings_synthetic_real_dep'
+filename_theta_true = 'cleaned_data/theta_true_synthetic_dep'
+# X = np.zeros((N,U+d+1))
 
-# print theta.shape
-for i in range(K):
-	theta = np.random.multivariate_normal(mean=mean,cov=cov)
-	theta_true.append(theta)
+# X, Y, theta_true = create_syntheticdata.create_data_independent(d=d, U=U, N=N, K=K)
+# np.save(filename_context, X)
+# np.save(filename_rating, Y)
+# np.save(filename_theta_true, theta_true)
 
-theta_true = np.array(theta_true).transpose()
-# print theta_true.shape
-# sys.exit(0)
+# X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M)
+# np.save(filename_context, X)
+# np.save(filename_rating, Y)
+# np.save(filename_theta_true, theta_true)
 
 
+X = np.load(filename_context + '.npy')
+Y = np.load(filename_rating + '.npy')
+theta_true = np.load(filename_theta_true + '.npy')
 
-Y = []
-
-for i in range(N):	
-	user = randint(0, U - 1)
-	X[i][user+d] = 1
-	x = np.random.randn(1, d)	
-	X[i, : d] = x
-	X[i][U+d] = 1   
-	true_rating = np.array(np.matrix(X[i,:]) * np.matrix(theta_true)) + np.random.randn(1, K)
-	Y.append(np.squeeze(true_rating))
-
-
-Y = np.array(Y)
-# print X
-# sys.exit(0)
-# print theta_true.shape
-# print Y.shape
-# print Y
-# w = np.random.randint(10, size=(d, 1))
-# Y = np.matrix(X)*np.matrix(w)
-# noise = np.random.randint(10, size=(N, 1))
-# Y = Y + noise
 
 def calc_frobnorm(A,B):	
 	C = np.matrix(A) - np.matrix(B)
@@ -64,36 +44,35 @@ def calc_frobnorm(A,B):
 
 
 T = N
-# narm = 20
 narm = K
 
 # bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
 # bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1)]
 # bandits = [OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
-bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=U+d+1)]
-
-
+bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=M)]
+factor = {'Random' : 1, 'Online Bootstrap' : 300, 'Online Collaborative Bootstrap' : 0.9}
 
 bnum = 0
-colors = ['red', 'red', 'red', 'blue', 'blue', 'blue']
+colors = ['red', 'red', 'red', 'blue', 'blue', 'blue', 'green', 'green', 'green']
 reward_type = "real"
-factor = 500
+
 regret = np.zeros(T, dtype=np.float)
 frob_norm = np.zeros(T+1, dtype=np.float)
 root_T = np.zeros(T, dtype=np.float)
 lin_T = np.zeros(T, dtype=np.float)
 
+fp = open('results/result_synthetic_dep.txt', 'a')
 for bandit in bandits:
+    print bandit.name()
     # f = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
     # frob_norm[0] = f
     # sys.exit()
     for i in range(0, T):
 		root_T[i] = 10000*math.sqrt(i)
-		lin_T[i] = 10*i
+		lin_T[i] = 100*i
 
     	# Get context
-		context = X[i,:]
-		# print context
+		context = X[i,:]		
 
 		# Find the optimum arm in hindsight
 		true_rewards = Y[i, :]
@@ -105,7 +84,7 @@ for bandit in bandits:
 			if i >= 300:		
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor[bandit.name()])
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
@@ -119,119 +98,47 @@ for bandit in bandits:
 			else:
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor[bandit.name()])
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				if i == 0:
 					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
 				else:
 					regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
-
-			# frob_norm[i+1] = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
-			# root_T[i] = 2000*math.sqrt(i)
-			# lin_T[i] = i
+			
 
 		else:
-			arm = bandit.choose()
+			arm, exp_reward = bandit.choose(context)
 			reward = -1
-			bandit.update(context, reward, exp_reward, reward_type, factor)
+			bandit.update(context, reward, exp_reward, reward_type, factor[bandit.name()])
 
 			if i == 0:
 					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
 			else:
 				regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
-			# print i, opt_arm_in_hindsight, arm, Y[i][arm], Y[i][opt_arm_in_hindsight]
-
-
-
-
-    # print regret
-    # print lin_T
-    # print regret - lin_T
+	
+    fp.write(bandit.name() + " regret = " + str(regret[i]) + "\n")
     curcolor = colors[bnum]
     plt.figure(0)
-    plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name() + '1')
+    plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name())
     plt.legend()
-    bnum = (bnum + 1) % 6
+    plt.title('Regret')
+    bnum = (bnum + 1) 
 
     curcolor = colors[bnum]
     plt.figure(1)
-    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name() + '2')
+    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name())
     plt.legend()
-    bnum = (bnum + 1) % 6
+    plt.title('Regret - rT')
+    bnum = (bnum + 1) 
 
     curcolor = colors[bnum]
     plt.figure(2)
-    plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name() + '3')
+    plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name())
     plt.legend()
-    bnum = (bnum + 1) % 6
-
-    # sys.exit(0)
-    # curcolor = colors[bnum]
-    # # plt.figure(bnum)
-    # plt.plot(np.arange(T), root_T, color=curcolor, label='root T')
-    # plt.legend()
-    # bnum = (bnum + 1) % 4
-
-    # curcolor = colors[bnum]
-    # # plt.figure(bnum)
-    # plt.plot(np.arange(T), lin_T, color=curcolor, label='T')
-    # plt.legend()
-    # bnum = (bnum + 1) % 4
-
-    # curcolor = colors[bnum]
-    # plt.figure(bnum)
-    # plt.plot(np.arange(T+1), frob_norm, color=curcolor, label='frob_norm')
-    # plt.legend()
-    # bnum = (bnum + 1) % 4
-
-    
-# curcolor = colors[bnum]
-# # plt.figure(bnum)
-# plt.plot(np.arange(T), root_T, color=curcolor, label='root T')
-# plt.legend()
-# bnum = (bnum + 1) % 4
-
-# curcolor = colors[bnum]
-# # plt.figure(bnum)
-# plt.plot(np.arange(T), lin_T, color=curcolor, label='T')
-# plt.legend()
-# bnum = (bnum + 1) % 4
+    plt.title('Regret - r(T^0.5)')
+    bnum = (bnum + 1) 
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-#         # Choose a subset of datapoints as arms
-        # arms = np.random.randint(N, size=narm)
-#         cts = X[arms, :]
-#         rwrds = Y[arms]
-
-#         # Ask agent to choose an arm and update it
-#         # with obtained reward
-#         arm = bandit.choose(cts)
-#         bandit.update(cts[arm, :], rwrds[arm])
-
-#         # To compute actual regret, we find max possible reward
-#         opt_arm = np.argmax(rwrds)
-
-#         if i == 0:
-#             regret[i] = rwrds[opt_arm] - rwrds[arm]
-#         else:
-#             regret[i] = ((rwrds[opt_arm] - rwrds[arm]) + regret[i-1])
-
-#     # plt.figure(bnum+1)
-#     plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name())
-#     plt.legend()
-#     bnum = bnum + 1
-# plt.show()
+fp.close()
