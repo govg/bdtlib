@@ -7,6 +7,7 @@ Each agent provides the following two methods :
     update()    :   Updates the model parameters given the context
                     and the reward
 '''
+import sys
 import time
 import math
 import random
@@ -171,9 +172,10 @@ class OnlineBootstrap():
         self.B = B
         self.d = d
         self.narm = narm
+        self.l = 1
 
         mean = np.zeros((self.d))
-        cov = narm*np.identity((self.d))
+        cov = 20*np.identity((self.d))
 
         self.theta_all = []
         for i in range(self.narm):
@@ -222,6 +224,7 @@ class OnlineBootstrap():
             p = np.random.poisson(lam=1)
             for z in range(1,p+1):
                 eta = 1.0 / math.sqrt(z+1)
+                self.l += 1
                 # print eta
                 # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
                 if reward_type == "real":
@@ -250,7 +253,6 @@ class OnlineBootstrap():
         return "Online Bootstrap"
 
 
-
 class OnlineCollaborativeBootstrap():
     def __init__(self, B=1, narm=10, D=10, M=10):     
         self.B = B
@@ -259,53 +261,46 @@ class OnlineCollaborativeBootstrap():
         self.narm = narm
 
         mean = np.zeros((self.D))
-        cov = M*np.identity((self.D))
+        cov = 20*np.identity((self.D))
       
-        self.theta_basis_all = []
-        for i in range(self.M):
-            theta_basis = []
-            for j in range(self.B):          
-                theta = np.random.multivariate_normal(mean=mean,cov=cov)
-                theta_basis.append(theta)
+        self.theta_basis = []
+        for i in range(self.M):          
+            theta = np.random.multivariate_normal(mean=mean,cov=cov)
+            self.theta_basis.append(theta)
 
-            self.theta_basis_all.append(theta_basis)
-
-        self.theta_basis_all = np.array(self.theta_basis_all)
+        self.theta_basis = np.array(self.theta_basis)
         
         # print self.theta_all
 
         mean = np.zeros((self.M))
-        cov = narm*np.identity((self.M))
+        cov = 20*np.identity((self.M))
      
         self.Z = []
         for i in range(self.narm):
-            Z_temp = []
-            for j in range(self.B):
-                z =  np.random.multivariate_normal(mean=mean,cov=cov)
-                Z_temp.append(z)
-
-            self.Z.append(Z_temp)
+            z =  np.random.multivariate_normal(mean=mean,cov=cov)
+            self.Z.append(z)
 
         self.Z = np.array(self.Z)
 
-        # self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
+        self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
         
     
     def choose(self, context): 
-        self.selected_arm_Z_feats = np.zeros((self.narm, self.M))
-        self.selected_arm_theta_basis_feats = np.zeros((self.M, self.D))
+        selected_arm_feats = np.zeros((self.narm, self.D))
+        # print selected_arm_feats.shape
+        # Sample arm feature for each arm
+        # for k in range(self.narm):
+            # selected_feature_index = random.randint(0, self.B-1)
+            # print selected_arm_feats.shape
+            # print self.theta_all.shape
+            # print selected_feature_index
+            # selected_arm_feats[k,:] = self.theta_all[k, selected_feature_index, : ] # Randomly select the feature
 
-        for m in range(self.M):
-            selected_theta_index = random.randint(0, self.B-1)
-            self.selected_arm_theta_basis_feats[m,:] = self.theta_basis_all[m,selected_theta_index,:]
-
-        for k in range(self.narm):
-            selected_Z_index = random.randint(0, self.B-1)
-            self.selected_arm_Z_feats[k,:] = self.Z[k,selected_Z_index,:]
-
-        self.theta_all = np.matrix(self.selected_arm_Z_feats)*np.matrix(self.selected_arm_theta_basis_feats)
-       
-        exp_rewards = np.matrix(context)*np.transpose(self.theta_all)        
+        # Select the arm
+        # print context.shape
+        # print selected_arm_feats.shape
+        # exp_rewards = np.matrix(context)*np.transpose(np.matrix(selected_arm_feats))
+        exp_rewards = np.matrix(context)*np.transpose(np.matrix(self.theta_all))        
         optarm = np.argmax(exp_rewards)
         self.selected_arm = optarm
         # print optarm
@@ -319,64 +314,39 @@ class OnlineCollaborativeBootstrap():
     def update(self, context, reward, exp_reward, reward_type, factor):
         self.update_Z(context, reward, exp_reward, reward_type, factor)
         self.update_theta(context, reward, exp_reward, reward_type, factor)
-        # self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
+        self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward, reward_type, factor):
-        # eta = 0.0005
-        modified_context = np.squeeze(np.array(np.matrix(self.selected_arm_theta_basis_feats)*np.transpose(np.matrix(context))))
-        for j in range(self.B):
-            p = np.random.poisson(lam=1)
-            for z in range(1,p+1):
-                eta = 1.0 / math.sqrt(z+1)
-                # print eta
-                # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
-                if reward_type == "real":
-                    self.Z[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, modified_context, factor)
-                else:
-                    self.Z[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+        eta = 0.0008
+        modified_context = np.squeeze(np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context))))
         # print np.transpose(np.matrix(context)).shape
         # print modified_context.shape
         # print self.Z[self.selected_arm, : ].shape
         # print reward
         # print exp_reward
         # self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
-        # if reward_type == "real":
-        #     self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
-        # else:
-        #     self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+        if reward_type == "real":
+            self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
+        else:
+            self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
 
 
     def update_theta(self, context, reward, exp_reward, reward_type, factor):
-        for m in range(self.M):
-            # eta = 0.0005
-            
-            
+        for i in range(self.M):
+            eta = 0.0008
+            modified_context = np.array(self.Z[self.selected_arm][i]*context)
+            exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
-            
-
-            for j in range(self.B):
-                modified_context = np.array(self.Z[self.selected_arm][j][m]*context)
-                exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis_all[m,j,:])*np.matrix(modified_context).transpose()))
-                pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.selected_arm_Z_feats[self.selected_arm, :])*np.matrix(self.selected_arm_theta_basis_feats)*np.matrix(context).transpose())
-
-                p = np.random.poisson(lam=1)
-                for z in range(1,p+1):
-                    eta = 1.0 / math.sqrt(z+1)
-                    # print eta
-                    # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
-                    if reward_type == "real":
-                        self.theta_basis_all[m, j , :] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
-                    else:
-                        self.theta_basis_all[m, j , :] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+            pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())
             # print self.theta_basis[i, : ].shape
             # print np.array(modified_context).shape
             # self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
-            # if reward_type == "real":
-            #     # print self.Z[self.selected_arm, : ].shape
-            #     # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
-            #     self.theta_basis[i, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
-            # else:
-            #     self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+            if reward_type == "real":
+                # print self.Z[self.selected_arm, : ].shape
+                # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
+                self.theta_basis[i, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+            else:
+                self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
             
 
 
@@ -384,21 +354,9 @@ class OnlineCollaborativeBootstrap():
         arm = random.randint(0, self.narm - 1)
         self.selected_arm = arm 
 
-        # r = random.randint(0, self.B - 1)
-        
-        self.selected_arm_Z_feats = np.zeros((self.narm, self.M))
-        self.selected_arm_theta_basis_feats = np.zeros((self.M, self.D))
-
-        for m in range(self.M):
-            selected_theta_index = random.randint(0, self.B-1)
-            self.selected_arm_theta_basis_feats[m,:] = self.theta_basis_all[m,selected_theta_index,:]
-
-        # for k in range(self.narm):
-        selected_Z_index = random.randint(0, self.B-1)
-        self.selected_arm_Z_feats[0,:] = self.Z[arm,selected_Z_index,:]
-
-        self.theta_all = np.matrix(self.selected_arm_Z_feats)*np.matrix(self.selected_arm_theta_basis_feats)
+        r = random.randint(0, self.B - 1)
         exp_reward = np.array(np.matrix(context)*np.transpose(np.matrix(self.theta_all[arm, :])))
+
         # print exp_reward[0][0]
         return arm, exp_reward[0][0]
 
@@ -407,3 +365,174 @@ class OnlineCollaborativeBootstrap():
 
     def name(self):
         return "Online Collaborative Bootstrap"
+
+
+# class OnlineCollaborativeBootstrap():
+#     def __init__(self, B=1, narm=10, D=10, M=10):     
+#         self.B = B
+#         self.D = D
+#         self.M = M
+#         self.narm = narm
+#         self.l1 = 1
+#         self.l2 = 1
+
+#         mean = np.zeros((self.D))
+#         cov = 1*np.identity((self.D))
+      
+#         self.theta_basis_all = []
+#         for i in range(self.M):
+#             theta_basis = []
+#             for j in range(self.B):          
+#                 theta = np.random.multivariate_normal(mean=mean,cov=cov)
+#                 theta_basis.append(theta)
+
+#             self.theta_basis_all.append(theta_basis)
+
+#         self.theta_basis_all = np.array(self.theta_basis_all)
+        
+#         # print self.theta_all
+
+#         mean = np.zeros((self.M))
+#         cov = 1*np.identity((self.M))
+     
+#         self.Z = []
+#         for i in range(self.narm):
+#             Z_temp = []
+#             for j in range(self.B):
+#                 z =  np.random.multivariate_normal(mean=mean,cov=cov)
+#                 Z_temp.append(z)
+
+#             self.Z.append(Z_temp)
+
+#         self.Z = np.array(self.Z)
+
+#         # self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
+        
+    
+#     def choose(self, context): 
+#         self.selected_arm_Z_feats = np.zeros((self.narm, self.M))
+#         self.selected_arm_theta_basis_feats = np.zeros((self.M, self.D))
+
+#         for m in range(self.M):
+#             selected_theta_index = random.randint(0, self.B-1)
+#             self.selected_arm_theta_basis_feats[m,:] = self.theta_basis_all[m,selected_theta_index,:]
+
+#         for k in range(self.narm):
+#             selected_Z_index = random.randint(0, self.B-1)
+#             self.selected_arm_Z_feats[k,:] = self.Z[k,selected_Z_index,:]
+
+#         self.theta_all = np.matrix(self.selected_arm_Z_feats)*np.matrix(self.selected_arm_theta_basis_feats)
+       
+#         exp_rewards = np.matrix(context)*np.transpose(self.theta_all)        
+#         optarm = np.argmax(exp_rewards)
+#         self.selected_arm = optarm
+#         # print optarm
+#         exp_rewards = np.array(exp_rewards)
+
+#         # print optarm
+#         # print exp_rewards.shape
+
+#         return optarm, exp_rewards[0][optarm] 
+
+#     def update(self, context, reward, exp_reward, reward_type, factor):
+#         self.update_Z(context, reward, exp_reward, reward_type, factor)
+#         self.update_theta(context, reward, exp_reward, reward_type, factor)
+#         # self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
+
+#     def update_Z(self, context, reward, exp_reward, reward_type, factor):
+#         # eta = 0.0005
+#         modified_context = np.squeeze(np.array(np.matrix(self.selected_arm_theta_basis_feats)*np.transpose(np.matrix(context))))
+#         for j in range(self.B):
+#             p = np.random.poisson(lam=1)
+#             for z in range(1,p+1):
+#                 eta = 1.0 / math.sqrt(z+1)
+#                 self.l1 += 1
+#                 eta = 0.00008
+#                 # print eta
+#                 # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
+#                 if reward_type == "real":
+#                     self.Z[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, modified_context, factor)
+#                 else:
+#                     self.Z[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+#         # print np.transpose(np.matrix(context)).shape
+#         # print modified_context.shape
+#         # print self.Z[self.selected_arm, : ].shape
+#         # print reward
+#         # print exp_reward
+#         # self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
+#         # if reward_type == "real":
+#         #     self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
+#         # else:
+#         #     self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+
+
+#     def update_theta(self, context, reward, exp_reward, reward_type, factor):
+#         # print "here"
+#         for m in range(self.M):
+#             # eta = 0.0005
+            
+            
+#             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
+            
+#             for j in range(self.B):
+#                 modified_context = np.squeeze(np.array(float(self.Z[self.selected_arm][j][m])*context))
+#                 if np.isnan(self.selected_arm_theta_basis_feats[m,:]).any():
+#                     sys.exit(0)
+#                 # print self.selected_arm_theta_basis_feats[m,:]
+#                 exp_pseudo_reward = float(np.matrix(self.selected_arm_theta_basis_feats[m,:])*np.matrix(modified_context).transpose())
+#                 pseudo_reward = reward + exp_pseudo_reward - float(np.matrix(self.selected_arm_Z_feats[self.selected_arm, :])*np.matrix(self.selected_arm_theta_basis_feats)*np.matrix(context).transpose())
+#                 # print "theta_basis", np.matrix(self.theta_basis_all[m,j,:])
+#                 # print "Z", self.Z[self.selected_arm][j][m]
+#                 # exp_pseudo_reward = int(np.matrix(self.selected_arm_theta_basis_feats[m,:])*np.matrix(modified_context).transpose())
+#                 # pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.selected_arm_Z_feats[self.selected_arm, :])*np.matrix(self.selected_arm_theta_basis_feats)*np.matrix(context).transpose())
+
+#                 p = np.random.poisson(lam=1)
+#                 for z in range(1,p+1):
+#                     eta = 1.0 / math.sqrt(z+1)
+#                     self.l2 += 1
+#                     eta = 0.00008
+#                     # print eta
+#                     # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
+#                     if reward_type == "real":
+#                         self.theta_basis_all[m, j , :] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+#                     else:
+#                         self.theta_basis_all[m, j , :] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+#             # print self.theta_basis[i, : ].shape
+#             # print np.array(modified_context).shape
+#             # self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
+#             # if reward_type == "real":
+#             #     # print self.Z[self.selected_arm, : ].shape
+#             #     # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
+#             #     self.theta_basis[i, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+#             # else:
+#             #     self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+            
+#         # sys.exit(0)
+
+#     def get_random_arm(self, context):
+#         arm = random.randint(0, self.narm - 1)
+#         self.selected_arm = arm 
+
+#         # r = random.randint(0, self.B - 1)
+        
+#         self.selected_arm_Z_feats = np.zeros((self.narm, self.M))
+#         self.selected_arm_theta_basis_feats = np.zeros((self.M, self.D))
+
+#         for m in range(self.M):
+#             selected_theta_index = random.randint(0, self.B-1)
+#             self.selected_arm_theta_basis_feats[m,:] = self.theta_basis_all[m,selected_theta_index,:]
+
+#         # for k in range(self.narm):
+#         selected_Z_index = random.randint(0, self.B-1)
+#         self.selected_arm_Z_feats[0,:] = self.Z[arm,selected_Z_index,:]
+
+#         self.theta_all = np.matrix(self.selected_arm_Z_feats)*np.matrix(self.selected_arm_theta_basis_feats)
+#         exp_reward = np.array(np.matrix(context)*np.transpose(np.matrix(self.theta_all[arm, :])))
+#         # print exp_reward[0][0]
+#         return arm, exp_reward[0][0]
+
+#     def get_params(self):
+#         return self.theta_all[:,self.B-1,:]
+
+#     def name(self):
+#         return "Online Collaborative Bootstrap"
