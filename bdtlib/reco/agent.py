@@ -317,7 +317,7 @@ class OnlineCollaborativeBootstrap():
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
     def update_Z(self, context, reward, exp_reward, reward_type, factor):
-        eta = 0.0008
+        eta = 0.0006
         modified_context = np.squeeze(np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context))))
         # print np.transpose(np.matrix(context)).shape
         # print modified_context.shape
@@ -333,7 +333,7 @@ class OnlineCollaborativeBootstrap():
 
     def update_theta(self, context, reward, exp_reward, reward_type, factor):
         for i in range(self.M):
-            eta = 0.0008
+            eta = 0.0006
             modified_context = np.array(self.Z[self.selected_arm][i]*context)
             exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
