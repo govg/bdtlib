@@ -6,37 +6,7 @@ import create_syntheticdata
 import matplotlib.pyplot as plt
 
 sys.path.append('../bdtlib')
-from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random
-
-
-# Toy data, to play with
-# Context vector is 1-hot depicting the current user
-d = 0
-U = 50
-N = 200000
-K = 200
-M = 40
-
-# filename_context = 'cleaned_data/contexts_synthetic_real'
-# filename_rating = 'cleaned_data/ratings_synthetic_real'
-# filename_theta_true = 'cleaned_data/theta_true_synthetic'
-
-
-filename_context = 'cleaned_data/contexts_synthetic_real_dep'
-filename_rating = 'cleaned_data/ratings_synthetic_real_dep'
-filename_theta_true = 'cleaned_data/theta_true_synthetic_dep'
-# X = np.zeros((N,U+d+1))
-
-# X, Y, theta_true = create_syntheticdata.create_data_independent(d=d, U=U, N=N, K=K)
-# X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M)
-# np.save(filename_context, X)
-# np.save(filename_rating, Y)
-# np.save(filename_theta_true, theta_true)
-
-
-X = np.load(filename_context + '.npy')
-Y = np.load(filename_rating + '.npy')
-theta_true = np.load(filename_theta_true + '.npy')
+from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random, LinUCB
 
 
 def calc_frobnorm(A,B):	
@@ -45,38 +15,37 @@ def calc_frobnorm(A,B):
 	return f
 
 
-T = N
-narm = K
+def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, X, Y, narm, d, M):
+	
+	bn = 0
+	bnum = 0
+	# colors = ['red', 'red', 'red', 'red', 'blue', 'blue', 'blue', 'blue', 'green', 'green', 'green', 'green']
+	# reward_type = "real"
 
-# bandits = [Random(narm=narm), OnlineBootstrap(B=10, narm=narm, d=U+d+1)]
-# bandits = [OnlineBootstrap(B=1, narm=narm, d=U+d+1)]
-# bandits = [OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=M)]
-bandits = [Random(narm=narm), OnlineBootstrap(B=20, narm=narm, d=U+d+1), OnlineCollaborativeBootstrap(B=20, narm=narm, D=U+d+1, M=M)]
-# bandits = [Random(narm=narm), OnlineCollaborativeBootstrap(B=15, narm=narm, D=U+d+1, M=M)]
+	regret = np.zeros(T, dtype=np.float)
+	avg_regret = np.zeros(T, dtype=np.float)
+	# best_avg_regret = np.zeros((len(bandits),T), dtype=np.float)
+	frob_norm = np.zeros(T+1, dtype=np.float)
+	root_T = np.zeros(T, dtype=np.float)
+	lin_T = np.zeros(T, dtype=np.float)
 
-factor = {'Random' : 1, 'Online Bootstrap' : 200, 'Online Collaborative Bootstrap' : 170}
+	
+	
+    # f = 50
+  #   while f <= 1000:		
+		
+		# f += increment
 
-bnum = 0
-colors = ['red', 'red', 'red', 'blue', 'blue', 'blue', 'green', 'green', 'green']
-reward_type = "real"
-
-regret = np.zeros(T, dtype=np.float)
-avg_regret = np.zeros(T, dtype=np.float)
-frob_norm = np.zeros(T+1, dtype=np.float)
-root_T = np.zeros(T, dtype=np.float)
-lin_T = np.zeros(T, dtype=np.float)
-
-fp = open('results/result_synthetic_dep.txt', 'a')
-for bandit in bandits:
-    print bandit.name()
-    # f = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
-    # frob_norm[0] = f
-    # sys.exit()
-    for i in range(0, T):
+		# factor = {'Random' : 1, 'Online Bootstrap' : f, 'Online Collaborative Bootstrap' : f, 'LinUCB' : f}
+		# print factor		
+		# f = calc_frobnorm(np.transpose(theta_true), bandit.get_params())
+		# frob_norm[0] = f
+		# sys.exit()
+	for i in range(0, T):
 		root_T[i] = 10000*math.sqrt(i+1)
 		lin_T[i] = 100*(i+1) 
 
-    	# Get context
+		# Get context
 		context = X[i,:]		
 
 		# Find the optimum arm in hindsight
@@ -89,10 +58,10 @@ for bandit in bandits:
 			if i >= 300:		
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor[bandit.name()])
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
-
-				print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
+				# if i % 1000 == 0:
+				# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
 				# print opt_arm_in_hindsight, arm, exp_reward, Y[i][arm]
 
 				if i == 0:
@@ -103,7 +72,7 @@ for bandit in bandits:
 			else:
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor[bandit.name()])
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				if i == 0:
@@ -114,9 +83,9 @@ for bandit in bandits:
 
 		else:
 			arm, exp_reward = bandit.choose(context)
-			reward = -1
-			bandit.update(context, reward, exp_reward, reward_type, factor[bandit.name()])
-			print i, opt_arm_in_hindsight, arm, Y[i][arm], exp_reward
+			bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+			# if i % 1000 == 0:
+			# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
 
 			if i == 0:
 					regret[i] = Y[i][opt_arm_in_hindsight] - Y[i][arm]
@@ -124,29 +93,41 @@ for bandit in bandits:
 				regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
 		avg_regret[i] = regret[i] / (i+1)
+		if i % 1000 == 0:
+			print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, alpha, bandit.name()
 
+	if avg_regret[i] > best_avg_regret[i]:
+		best_avg_regret[:] = avg_regret[:]
+		filename_best_avg_regret = 'plots/best_avg_regret_' + bandit.name() 
+		np.save(filename_best_avg_regret, best_avg_regret)
+
+	fp.write(bandit.name() + " regret = " + str(regret[i]) + " avg regret = " + str(avg_regret[i]) + " factor = " + str(factor) + " M = " + str(M) + " alpha = " + str(alpha) + "\n")
+
+	return best_avg_regret[i]
+	# fp.flush()			
+    
+	# fp.close()
+	# return best_avg_regret
 	
-    fp.write(bandit.name() + " regret = " + str(regret[i]) + " avg regret = " + str(avg_regret[i]) + " factor = " + str(factor[bandit.name()]) + "\n")
-    curcolor = colors[bnum]
-    plt.figure(0)
-    plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name())
-    plt.legend()
-    plt.title('Regret')
-    bnum = (bnum + 1) 
 
-    curcolor = colors[bnum]
-    plt.figure(1)
-    plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name())
-    plt.legend()
-    plt.title('Regret - rT')
-    bnum = (bnum + 1) 
+# curcolor = colors[bnum]
+# plt.figure(0)
+# plt.plot(np.arange(T), regret, color=curcolor, label=bandit.name())
+# plt.legend()
+# plt.title('Regret')
+# bnum = (bnum + 1) 
 
-    curcolor = colors[bnum]
-    plt.figure(2)
-    plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name())
-    plt.legend()
-    plt.title('Regret - r(T^0.5)')
-    bnum = (bnum + 1) 
+# curcolor = colors[bnum]
+# plt.figure(1)
+# plt.plot(np.arange(T), regret - lin_T, color=curcolor, label=bandit.name())
+# plt.legend()
+# plt.title('Regret - rT')
+# bnum = (bnum + 1) 
 
-fp.close()
-plt.show()
+# curcolor = colors[bnum]
+# plt.figure(2)
+# plt.plot(np.arange(T), regret - root_T, color=curcolor, label=bandit.name())
+# plt.legend()
+# plt.title('Regret - r(T^0.5)')
+# bnum = (bnum + 1) 
+# plt.show()

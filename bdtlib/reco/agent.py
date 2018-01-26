@@ -60,7 +60,7 @@ class ThompsonSampling():
 
 
 class LinUCB():
-    def __init__(self, alpha, d, sigma=5, narm=10):
+    def __init__(self, alpha=1, d=10, sigma=5, narm=10):
         self.d = d
         self.sigma_sq = sigma**2
         self.narm = narm
@@ -96,8 +96,11 @@ class LinUCB():
         return optarm, exp_rewards[optarm] 
 
     def update(self, context, reward, exp_reward, reward_type, factor):
-        x = np.matrix(context).transpose()
-        self.A[self.selected_arm,:,:] += x*x.transpose()
+        x = np.matrix(context)
+        self.A[self.selected_arm,:,:] += x.transpose()*x
+        # print self.b[self.selected_arm,:].shape
+        # print reward
+        # print x.shape
         self.b[self.selected_arm,:] += reward*x
 
         return
