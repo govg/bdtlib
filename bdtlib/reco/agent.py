@@ -86,7 +86,7 @@ class LinUCB():
             mu = Ainv * b
             sig = Ainv * self.sigma_sq
 
-            ucb[i] = int((mu.transpose() * context) + self.alpha*(np.sqrt(mu.transpose()*sig*mu))) 
+            ucb[i] = float((mu.transpose() * context) + self.alpha*(np.sqrt(mu.transpose()*sig*mu))) 
 
         # print self.narm - np.count_nonzero(ucb)
         optarm = np.argmax(ucb)
