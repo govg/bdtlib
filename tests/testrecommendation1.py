@@ -15,7 +15,7 @@ def calc_frobnorm(A,B):
 	return f
 
 
-def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, X, Y, narm, d, M):
+def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret, T, X, Y, narm, d, M, filename_plot_data):
 	
 	bn = 0
 	bnum = 0
@@ -94,15 +94,16 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 
 		avg_regret[i] = regret[i] / (i+1)
 		if i % 1000 == 0:
-			print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, alpha, bandit.name()
+			print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, factor, alpha, bandit.name(), flag
 
-	if avg_regret[i] > best_avg_regret[i]:
+	if avg_regret[i] < best_avg_regret[i]:
 		best_avg_regret[:] = avg_regret[:]
-		filename_best_avg_regret = 'plots/best_avg_regret_' + bandit.name() 
+		filename_best_avg_regret = filename_plot_data + bandit.name() + str(flag)
 		np.save(filename_best_avg_regret, best_avg_regret)
 
 	fp.write(bandit.name() + " regret = " + str(regret[i]) + " avg regret = " + str(avg_regret[i]) + " factor = " + str(factor) + " M = " + str(M) + " alpha = " + str(alpha) + "\n")
-
+	fp.flush()
+	
 	return best_avg_regret[i]
 	# fp.flush()			
     
