@@ -1,8 +1,7 @@
-import sys
-import math
-import time
 import numpy as np
-from random import randint
+import sys
+import time
+
 import create_syntheticdata
 from testrecommendation1 import run_recommender
 
@@ -13,9 +12,9 @@ from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random, L
 # Context vector is 1-hot depicting the current user
 d = 0
 U = 100
-N = 5000
+N = 10000
 K = 300
-# M = 6
+M_true = 150
 
 # filename_context = 'cleaned_data/contexts_synthetic_real'
 # filename_rating = 'cleaned_data/ratings_synthetic_real'
@@ -23,21 +22,21 @@ K = 300
 
 # X, Y, theta_true = create_syntheticdata.create_data_independent(d=d, U=U, N=N, K=K)
 
-filename_context = 'cleaned_data/contexts_synthetic_real_dep'
-filename_rating = 'cleaned_data/ratings_synthetic_real_dep'
-filename_theta_true = 'cleaned_data/theta_true_synthetic_dep'
+filename_context = 'cleaned_data/contexts_synthetic_real_dep5'
+filename_rating = 'cleaned_data/ratings_synthetic_real_dep5'
+filename_theta_true = 'cleaned_data/theta_true_synthetic_dep5'
 
-# X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=100)
-
-
-# np.save(filename_context, X)
-# np.save(filename_rating, Y)
-# np.save(filename_theta_true, theta_true)
+X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M_true)
 
 
-X = np.load(filename_context + '.npy')
-Y = np.load(filename_rating + '.npy')
-theta_true = np.load(filename_theta_true + '.npy')
+np.save(filename_context, X)
+np.save(filename_rating, Y)
+np.save(filename_theta_true, theta_true)
+
+
+# X = np.load(filename_context + '.npy')
+# Y = np.load(filename_rating + '.npy')
+# theta_true = np.load(filename_theta_true + '.npy')
 
 
 def run_exp(X, Y, K, d):
@@ -46,11 +45,11 @@ def run_exp(X, Y, K, d):
 	T = N
 	num_bandits = 4
 	reward_type = "real"
-	filename_result = 'results/result5.txt'
+	filename_result = 'results/result_sparse5.txt'
 	# filename_result = 'results/result_independent_real.txt'
 	# best_avg_regret = np.zeros((num_bandits,T), dtype=np.float)
 	best_avg_regret = np.full((num_bandits, T), 99999999999)
-	filename_plot_data = 'plots/best_avg_regret_'
+	filename_plot_data = 'plots/5_best_avg_regret_sparse_'
 	fp = open(filename_result, 'a')
 	# fp.write("InDependent Data\n")
 	flag = 2
@@ -58,7 +57,7 @@ def run_exp(X, Y, K, d):
 		bn += 1
 
 		if bn == 1:
-			continue
+			# continue
 			factor = 0
 			alpha = 0
 			M = 0
@@ -73,7 +72,7 @@ def run_exp(X, Y, K, d):
 
 
 		elif bn == 2:
-			continue
+			# continue
 			alpha = 0
 			M = 0
 			
@@ -90,7 +89,7 @@ def run_exp(X, Y, K, d):
 
 
 		elif bn == 3:
-			continue
+			# continue
 			best_factor = 50
 			alpha = 0
 			M = int(narm / 2)
@@ -146,4 +145,4 @@ def main():
 	run_exp(X, Y, K, d)
 
 if __name__ == "__main__":
-    main()
+	main()

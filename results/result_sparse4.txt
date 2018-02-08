@@ -1,0 +1,65 @@
+Random regret = 567760.247104 avg regret = 113.552049421 factor = 0 M = 0 alpha = 0
+Random regret = 560661.601825 avg regret = 112.132320365 factor = 0 M = 0 alpha = 0
+Random regret = 561729.621758 avg regret = 112.345924352 factor = 0 M = 0 alpha = 0
+Random regret = 559968.025526 avg regret = 111.993605105 factor = 0 M = 0 alpha = 0
+Random regret = 560834.330573 avg regret = 112.166866115 factor = 0 M = 0 alpha = 0
+Random regret = 562364.728609 avg regret = 112.472945722 factor = 0 M = 0 alpha = 0
+Random regret = 561475.579477 avg regret = 112.295115895 factor = 0 M = 0 alpha = 0
+Random regret = 560093.969688 avg regret = 112.018793938 factor = 0 M = 0 alpha = 0
+Random regret = 560228.078218 avg regret = 112.045615644 factor = 0 M = 0 alpha = 0
+Random regret = 561513.453794 avg regret = 112.302690759 factor = 0 M = 0 alpha = 0
+Avg Duration = 0.0502440929413
+Online Bootstrap regret = 330099.490001 avg regret = 66.0198980002 factor = 50 M = 0 alpha = 0
+Online Bootstrap regret = 317017.103493 avg regret = 63.4034206987 factor = 75 M = 0 alpha = 0
+Online Bootstrap regret = 276604.125375 avg regret = 55.3208250749 factor = 100 M = 0 alpha = 0
+Online Bootstrap regret = 374196.736404 avg regret = 74.8393472809 factor = 125 M = 0 alpha = 0
+Online Bootstrap regret = 310848.557002 avg regret = 62.1697114004 factor = 150 M = 0 alpha = 0
+Online Bootstrap regret = 416754.022864 avg regret = 83.3508045729 factor = 175 M = 0 alpha = 0
+Online Bootstrap regret = 469450.391181 avg regret = 93.8900782362 factor = 200 M = 0 alpha = 0
+Online Bootstrap regret = 376814.545251 avg regret = 75.3629090501 factor = 225 M = 0 alpha = 0
+Online Bootstrap regret = 500891.669661 avg regret = 100.178333932 factor = 250 M = 0 alpha = 0
+Online Bootstrap regret = 506477.841266 avg regret = 101.295568253 factor = 275 M = 0 alpha = 0
+Online Bootstrap regret = 526240.043902 avg regret = 105.24800878 factor = 300 M = 0 alpha = 0
+Online Bootstrap regret = 525679.652955 avg regret = 105.135930591 factor = 325 M = 0 alpha = 0
+Online Bootstrap regret = 511389.953732 avg regret = 102.277990746 factor = 350 M = 0 alpha = 0
+Online Bootstrap regret = 525959.714547 avg regret = 105.191942909 factor = 375 M = 0 alpha = 0
+Online Bootstrap regret = 471087.451639 avg regret = 94.2174903278 factor = 400 M = 0 alpha = 0
+Online Bootstrap regret = 539916.391811 avg regret = 107.983278362 factor = 425 M = 0 alpha = 0
+Online Bootstrap regret = 442472.547619 avg regret = 88.4945095238 factor = 450 M = 0 alpha = 0
+Online Bootstrap regret = 535637.298447 avg regret = 107.127459689 factor = 475 M = 0 alpha = 0
+Online Bootstrap regret = 556254.244954 avg regret = 111.250848991 factor = 500 M = 0 alpha = 0
+Online Bootstrap regret = 536023.680066 avg regret = 107.204736013 factor = 525 M = 0 alpha = 0
+Online Bootstrap regret = 547750.582892 avg regret = 109.550116578 factor = 550 M = 0 alpha = 0
+Online Bootstrap regret = 544618.760228 avg regret = 108.923752046 factor = 575 M = 0 alpha = 0
+Online Bootstrap regret = 547193.960887 avg regret = 109.438792177 factor = 600 M = 0 alpha = 0
+Online Bootstrap regret = 537721.923771 avg regret = 107.544384754 factor = 625 M = 0 alpha = 0
+Online Bootstrap regret = 528914.026929 avg regret = 105.782805386 factor = 650 M = 0 alpha = 0
+Online Bootstrap regret = 557845.225623 avg regret = 111.569045125 factor = 675 M = 0 alpha = 0
+Online Bootstrap regret = 540190.703513 avg regret = 108.038140703 factor = 700 M = 0 alpha = 0
+Online Bootstrap regret = 554331.541176 avg regret = 110.866308235 factor = 725 M = 0 alpha = 0
+Online Bootstrap regret = 544481.6126 avg regret = 108.89632252 factor = 750 M = 0 alpha = 0
+Online Bootstrap regret = 547226.213967 avg regret = 109.445242793 factor = 775 M = 0 alpha = 0
+Online Bootstrap regret = 534773.132278 avg regret = 106.954626456 factor = 800 M = 0 alpha = 0
+Online Bootstrap regret = 540439.756202 avg regret = 108.08795124 factor = 825 M = 0 alpha = 0
+Online Bootstrap regret = 555236.913878 avg regret = 111.047382776 factor = 850 M = 0 alpha = 0
+Online Bootstrap regret = 549283.229744 avg regret = 109.856645949 factor = 875 M = 0 alpha = 0
+Online Bootstrap regret = 544916.607377 avg regret = 108.983321475 factor = 900 M = 0 alpha = 0
+Online Bootstrap regret = 552580.248577 avg regret = 110.516049715 factor = 925 M = 0 alpha = 0
+Online Bootstrap regret = 559490.749387 avg regret = 111.898149877 factor = 950 M = 0 alpha = 0
+Online Bootstrap regret = 547402.466521 avg regret = 109.480493304 factor = 975 M = 0 alpha = 0
+Online Bootstrap regret = 545668.964562 avg regret = 109.133792912 factor = 1000 M = 0 alpha = 0
+Avg Duration = 42.2863855912
+Online Collaborative Bootstrap regret = 463704.259949 avg regret = 92.7408519898 factor = 50 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 475728.142145 avg regret = 95.1456284291 factor = 75 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 482018.357209 avg regret = 96.4036714418 factor = 100 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 471058.161793 avg regret = 94.2116323586 factor = 125 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 519576.388777 avg regret = 103.915277755 factor = 150 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 484945.362562 avg regret = 96.9890725124 factor = 175 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 524432.517549 avg regret = 104.88650351 factor = 200 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 543118.337985 avg regret = 108.623667597 factor = 225 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 550356.319107 avg regret = 110.071263821 factor = 250 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 544741.876694 avg regret = 108.948375339 factor = 275 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 544748.788946 avg regret = 108.949757789 factor = 300 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 394085.988036 avg regret = 78.8171976071 factor = 325 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 503890.508088 avg regret = 100.778101618 factor = 350 M = 150 alpha = 0
+Online Collaborative Bootstrap regret = 529917.772744 avg regret = 105.983554549 factor = 375 M = 150 alpha = 0

@@ -67,7 +67,7 @@ class LinUCB():
         self.A = []
         for i in range(narm):
             temp = np.matrix(np.identity(d))          
-            self.A.append(temp)            
+            self.A.append(temp)
 
         self.A = np.array(self.A)                  # K Identity Matrices
         self.b = np.matrix(np.random.randn(narm, d))     # K 'b' vectors
@@ -264,7 +264,7 @@ class OnlineCollaborativeBootstrap():
         self.narm = narm
 
         mean = np.zeros((self.D))
-        cov = 20*np.identity((self.D))
+        cov = np.identity((self.D))
       
         self.theta_basis = []
         for i in range(self.M):          
@@ -276,7 +276,7 @@ class OnlineCollaborativeBootstrap():
         # print self.theta_all
 
         mean = np.zeros((self.M))
-        cov = 20*np.identity((self.M))
+        cov = np.identity((self.M))
      
         self.Z = []
         for i in range(self.narm):
