@@ -58,7 +58,11 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 			if i >= 300:		
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				try:
+					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				except:
+					break
+				
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 				# if i % 1000 == 0:
 				# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
@@ -72,7 +76,10 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 			else:
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				try:
+					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				except:
+					break
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				if i == 0:
@@ -83,7 +90,10 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 
 		else:
 			arm, exp_reward = bandit.choose(context)
-			bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+			try:
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+			except:
+				break
 			# if i % 1000 == 0:
 			# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
 
