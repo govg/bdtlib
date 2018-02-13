@@ -22,9 +22,9 @@ M_true = 100
 #
 # X, Y, theta_true = create_syntheticdata.create_data_independent(d=d, U=U, N=N, K=K)
 
-filename_context = 'cleaned_data2/contexts_synthetic_real_dep4'
-filename_rating = 'cleaned_data2/ratings_synthetic_real_dep4'
-filename_theta_true = 'cleaned_data2/theta_true_synthetic_dep4'
+filename_context = 'cleaned_data2/contexts_synthetic_real_dep5'
+filename_rating = 'cleaned_data2/ratings_synthetic_real_dep5'
+filename_theta_true = 'cleaned_data2/theta_true_synthetic_dep5'
 
 X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M_true)
 #
@@ -45,11 +45,11 @@ def run_exp(X, Y, K, d):
 	T = N
 	num_bandits = 4
 	reward_type = "real"
-	filename_result = 'result_cleaned/result_sparse7.txt'
+	filename_result = 'result_cleaned/result_sparse8.txt'
 	# filename_result = 'results/result_independent_real.txt'
 	# best_avg_regret = np.zeros((num_bandits,T), dtype=np.float)
 	best_avg_regret = np.full((num_bandits, T), 99999999999)
-	filename_plot_data = 'plots_cleaned/7_best_avg_regret_sparse_'
+	filename_plot_data = 'plots_cleaned/8_best_avg_regret_sparse_'
 	fp = open(filename_result, 'a')
 	fp.write("Dependent Data\n")
 	flag = 2
