@@ -14,7 +14,7 @@ testImageFile = 't10k-images-idx3-ubyte.gz'
 testLabelFile = 't10k-labels-idx1-ubyte.gz'
 
 X, y, _ = read_MNIST(trainImageFile, trainLabelFile, train=True)
-XTest, yTest, _ = read_MNIST(testImageFile, testLabelFile, train=False)
+XTest, yTest, _  = read_MNIST(testImageFile, testLabelFile, train=False)
 
 clf = Perceptron(verbose=0, n_jobs=3)
 print "Training"

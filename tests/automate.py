@@ -16,27 +16,27 @@ N = 10000
 K = 200
 M_true = 100
 
-# filename_context = 'cleaned_data2/contexts_synthetic_real2'
-# filename_rating = 'cleaned_data2/ratings_synthetic_real2'
-# filename_theta_true = 'cleaned_data2/theta_true_synthetic2'
-
+# filename_context = 'cleaned_data2/contexts_synthetic_real3'
+# filename_rating = 'cleaned_data2/ratings_synthetic_real3'
+# filename_theta_true = 'cleaned_data2/theta_true_synthetic3'
+#
 # X, Y, theta_true = create_syntheticdata.create_data_independent(d=d, U=U, N=N, K=K)
 
-filename_context = 'cleaned_data2/contexts_synthetic_real_dep3'
-filename_rating = 'cleaned_data2/ratings_synthetic_real_dep3'
-filename_theta_true = 'cleaned_data2/theta_true_synthetic_dep3'
+filename_context = 'cleaned_data2/contexts_synthetic_real_dep4'
+filename_rating = 'cleaned_data2/ratings_synthetic_real_dep4'
+filename_theta_true = 'cleaned_data2/theta_true_synthetic_dep4'
 
-# X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M_true)
+X, Y, theta_true = create_syntheticdata.create_data_dependent(d=d, U=U, N=N, K=K, M=M_true)
 #
 #
-# np.save(filename_context, X)
-# np.save(filename_rating, Y)
-# np.save(filename_theta_true, theta_true)
+np.save(filename_context, X)
+np.save(filename_rating, Y)
+np.save(filename_theta_true, theta_true)
 
 
-X = np.load(filename_context + '.npy')
-Y = np.load(filename_rating + '.npy')
-theta_true = np.load(filename_theta_true + '.npy')
+# X = np.load(filename_context + '.npy')
+# Y = np.load(filename_rating + '.npy')
+# theta_true = np.load(filename_theta_true + '.npy')
 
 
 def run_exp(X, Y, K, d):
@@ -45,13 +45,13 @@ def run_exp(X, Y, K, d):
 	T = N
 	num_bandits = 4
 	reward_type = "real"
-	filename_result = 'result_cleaned/result_sparse5.txt'
+	filename_result = 'result_cleaned/result_sparse7.txt'
 	# filename_result = 'results/result_independent_real.txt'
 	# best_avg_regret = np.zeros((num_bandits,T), dtype=np.float)
 	best_avg_regret = np.full((num_bandits, T), 99999999999)
-	filename_plot_data = 'plots_cleaned/5_best_avg_regret_sparse_'
+	filename_plot_data = 'plots_cleaned/7_best_avg_regret_sparse_'
 	fp = open(filename_result, 'a')
-	# fp.write("Dependent Data\n")
+	fp.write("Dependent Data\n")
 	flag = 2
 	while bn < num_bandits:
 		bn += 1
@@ -78,7 +78,7 @@ def run_exp(X, Y, K, d):
 			
 			start_time = time.time()
 			c = 0
-			for factor in range(25, 1025, 25):
+			for factor in range(5, 1030, 25):
 				bandit = OnlineBootstrap(B=20, narm=narm, d=U+d+1)
 				run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn-1][:], T, X, Y, narm, d, M, filename_plot_data)
 				c += 1
@@ -97,7 +97,7 @@ def run_exp(X, Y, K, d):
 			best_M = M
 			c = 0
 			start_time = time.time()
-			for factor in range(25, 1025, 25):
+			for factor in range(5, 1030, 25):
 				bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=U+d+1, M=M)
 				r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn-1][:], T, X, Y, narm, d, M, filename_plot_data)
 				c += 1
