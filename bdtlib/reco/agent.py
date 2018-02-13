@@ -26,6 +26,9 @@ Will contain the following policies :
 
 '''
 
+def sigmoid(x):
+    sig = 1.0 / (1+np.exp(-x))
+    return sig
 
 class ThompsonSampling():
     def __init__(self, nu, d):
@@ -171,14 +174,15 @@ class Random():
 
 
 class OnlineBootstrap():
-    def __init__(self, B=1, narm=10, d=10):     
+    def __init__(self, B=1, narm=10, d=10, reward_type='real'):
         self.B = B
         self.d = d
         self.narm = narm
         self.l = 1
+        self.reward_type = reward_type
 
         mean = np.zeros((self.d))
-        cov = 20*np.identity((self.d))
+        cov = np.identity((self.d))
 
         self.theta_all = []
         for i in range(self.narm):
@@ -210,6 +214,8 @@ class OnlineBootstrap():
         # print context.shape
         # print selected_arm_feats.shape
         exp_rewards = np.matrix(context)*np.transpose(np.matrix(selected_arm_feats))
+        if self.reward_type == 'binary':
+            exp_rewards = sigmoid(exp_rewards)
         
         optarm = np.argmax(exp_rewards)
         self.selected_arm = optarm
@@ -257,11 +263,12 @@ class OnlineBootstrap():
 
 
 class OnlineCollaborativeBootstrap():
-    def __init__(self, B=1, narm=10, D=10, M=10):     
+    def __init__(self, B=1, narm=10, D=10, M=10, reward_type='real'):
         self.B = B
         self.D = D
         self.M = M
         self.narm = narm
+        self.reward_type = reward_type
 
         mean = np.zeros((self.D))
         cov = np.identity((self.D))
@@ -303,7 +310,11 @@ class OnlineCollaborativeBootstrap():
         # print context.shape
         # print selected_arm_feats.shape
         # exp_rewards = np.matrix(context)*np.transpose(np.matrix(selected_arm_feats))
-        exp_rewards = np.matrix(context)*np.transpose(np.matrix(self.theta_all))        
+        exp_rewards = np.matrix(context) * np.transpose(np.matrix(self.theta_all))
+        if self.reward_type == 'binary':
+            exp_rewards = sigmoid(exp_rewards)
+
+
         optarm = np.argmax(exp_rewards)
         self.selected_arm = optarm
         # print optarm
