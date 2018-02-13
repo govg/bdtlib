@@ -1,9 +1,10 @@
 import numpy as np
 import sys
 import time
+from readMNIST import read_MNIST
 
 import create_syntheticdata
-from testrecommendation1 import run_recommender
+from testClassificationBandit import run_recommender
 
 sys.path.append('../bdtlib')
 from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random, LinUCB
@@ -11,14 +12,14 @@ from bdtlib.reco import OnlineBootstrap, OnlineCollaborativeBootstrap, Random, L
 # Toy data, to play with
 # Context vector is 1-hot depicting the current user
 d = 784
-N = 5000
+N = 60000
 K = 10
 
 def run_exp(X, Y, K, d):
     bn = 0
     narm = K
     T = N
-    num_bandits = 4
+    num_bandits = 2
     reward_type = "binary"
     filename_result = 'result_classification/result1.txt'
     # filename_result = 'results/result_independent_real.txt'
@@ -26,7 +27,7 @@ def run_exp(X, Y, K, d):
     best_avg_regret = np.full((num_bandits, T), 99999999999)
     filename_plot_data = 'classification_plot/1_best_avg_regret'
     fp = open(filename_result, 'a')
-    fp.write("Dependent Data\n")
+
     flag = 1
     while bn < num_bandits:
         bn += 1
@@ -54,8 +55,8 @@ def run_exp(X, Y, K, d):
 
             start_time = time.time()
             c = 0
-            for factor in range(5, 1030, 25):
-                bandit = OnlineBootstrap(B=20, narm=narm, d=U + d + 1)
+            for factor in range(25, 1030, 25):
+                bandit = OnlineBootstrap(B=20, narm=narm, d=d, reward_type=reward_type)
                 run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], T, X, Y, narm,
                                 d, M, filename_plot_data)
                 c += 1
@@ -74,8 +75,8 @@ def run_exp(X, Y, K, d):
             best_M = M
             c = 0
             start_time = time.time()
-            for factor in range(5, 1030, 25):
-                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=U + d + 1, M=M)
+            for factor in range(25, 1030, 25):
+                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=M)
                 r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], T, X, Y,
                                     narm, d, M, filename_plot_data)
                 c += 1
@@ -108,7 +109,7 @@ def run_exp(X, Y, K, d):
             alpha = 0.5
             while alpha <= 10:
                 # pass
-                bandit = LinUCB(alpha=alpha, d=U + d + 1, sigma=1, narm=narm)
+                bandit = LinUCB(alpha=alpha, d=d, sigma=1, narm=narm)
                 r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], T, X, Y,
                                     narm, d, M, filename_plot_data)
                 alpha += 1
@@ -122,6 +123,13 @@ def run_exp(X, Y, K, d):
 
 
 def main():
+    trainImageFile = 'train-images-idx3-ubyte.gz'
+    trainLabelFile = 'train-labels-idx1-ubyte.gz'
+    testImageFile = 't10k-images-idx3-ubyte.gz'
+    testLabelFile = 't10k-labels-idx1-ubyte.gz'
+
+    X, _, Y = read_MNIST(trainImageFile, trainLabelFile, train=True)
+    # XTest, _, yTest, _ = read_MNIST(testImageFile, testLabelFile, train=False)
     run_exp(X, Y, K, d)
 
 

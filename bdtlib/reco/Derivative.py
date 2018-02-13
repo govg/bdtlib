@@ -13,6 +13,6 @@ def derivative_binary(y, y_exp, x, factor):
 	if y == y_pred:
 		der = 0*x
 	else:
-		der = y_exp*(1-y_exp)*x
+		der = y_exp*(1-y_exp)*x  / factor
 
 	return der
