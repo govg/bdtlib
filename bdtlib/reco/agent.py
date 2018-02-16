@@ -372,8 +372,12 @@ class OnlineCollaborativeBootstrap():
                 # print self.Z[self.selected_arm, : ].shape
                 # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
                 self.theta_basis[i, : ] += eta*derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+                # self.theta_basis[i, :] += eta * derivative_real(reward, exp_reward, modified_context,
+                #                                                 factor)
             else:
-                self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+                # self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
+                self.theta_basis[i, :] += eta * derivative_binary(reward, exp_reward, modified_context,
+                                                                factor)
             
 
 

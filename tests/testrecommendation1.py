@@ -29,7 +29,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 	root_T = np.zeros(T, dtype=np.float)
 	lin_T = np.zeros(T, dtype=np.float)
 
-	
+	# print "in func"
 	
     # f = 50
   #   while f <= 1000:		
@@ -42,6 +42,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 		# frob_norm[0] = f
 		# sys.exit()
 	for i in range(0, T):
+		# print "in loop"
 		root_T[i] = 10000*math.sqrt(i+1)
 		lin_T[i] = 100*(i+1) 
 
@@ -55,12 +56,17 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 		# print "opt arm : " + str(opt_arm_in_hindsight)
 
 		if bandit.name() == "Online Bootstrap" or bandit.name() == "Online Collaborative Bootstrap":
-			if i >= 300:		
+			# print "abc"
+			if i >= 300:
+				# print i
+				# print "abc"
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
 				try:
+					# print "here"
 					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				except:
+					# print "break"
 					break
 				
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
@@ -74,11 +80,13 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 					regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
 			else:
+				# print i
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
 				try:
 					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
 				except:
+					# print "break"
 					break
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
@@ -89,6 +97,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 			
 
 		else:
+			# print i
 			arm, exp_reward = bandit.choose(context)
 			try:
 				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
