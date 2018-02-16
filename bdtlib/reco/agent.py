@@ -179,7 +179,7 @@ class OnlineBootstrap():
         self.B = B
         self.d = d
         self.narm = narm
-        self.l = 1
+        # self.l = 1
         self.reward_type = reward_type
 
         mean = np.zeros((self.d))
@@ -231,16 +231,17 @@ class OnlineBootstrap():
     def update(self, context, reward, exp_reward, reward_type, factor):
         # print "here"
         for j in range(self.B):
-            p = np.random.poisson(lam=1)
-            for z in range(1,p+1):
-                eta = 1.0 / math.sqrt(z+1)
-                self.l += 1
-                # print eta
-                # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
-                if reward_type == "real":
-                    self.theta_all[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, context, factor)
-                else:
-                    self.theta_all[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, context, factor)
+            # p = np.random.poisson(lam=1)
+            # for z in range(1,p+1):
+            # eta = 1.0 / math.sqrt(z+1)
+            eta = 0.006
+            # self.l += 1
+            # print eta
+            # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
+            if reward_type == "real":
+                self.theta_all[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, context, factor)
+            else:
+                self.theta_all[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, context, factor)
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -268,6 +269,8 @@ class OnlineCollaborativeBootstrap():
         self.B = B
         self.D = D
         self.M = M
+        # self.lz = 0
+        # self.ltheta = 0
         self.narm = narm
         self.reward_type = reward_type
 
@@ -340,6 +343,11 @@ class OnlineCollaborativeBootstrap():
         # print reward
         # print exp_reward
         # self.Z[self.selected_arm, : ] += eta*(reward - exp_reward)*np.squeeze(modified_context)
+        p = np.random.poisson(lam=1)
+        # for z in range(1,p+1):
+        #     eta = 1.0 / math.sqrt(z+1)
+            # self.lz += 1
+
         if reward_type == "real":
             self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
         else:
@@ -350,12 +358,16 @@ class OnlineCollaborativeBootstrap():
         for i in range(self.M):
             eta = 0.006
             modified_context = np.array(self.Z[self.selected_arm][i]*context)
-            exp_pseudo_reward = int(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
+            exp_pseudo_reward = float(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
-            pseudo_reward = reward + exp_pseudo_reward - int(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())
+            pseudo_reward = reward + exp_pseudo_reward - float(np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose())
             # print self.theta_basis[i, : ].shape
             # print np.array(modified_context).shape
             # self.theta_basis[i, : ] += eta*(pseudo_reward - exp_pseudo_reward)*np.array(modified_context)
+            # p = np.random.poisson(lam=1)
+            # for z in range(1,p+1):
+            #     eta = 1.0 / math.sqrt(z+1)
+
             if reward_type == "real":
                 # print self.Z[self.selected_arm, : ].shape
                 # print derivative_real(pseudo_reward, exp_pseudo_reward, modified_context, factor).shape   
