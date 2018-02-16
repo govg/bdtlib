@@ -36,6 +36,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 
         # Pull arm as per Online Bootstrap
         arm, exp_reward = bandit.choose(context)
+        # print exp_reward
         try:
             bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
         except:
@@ -50,10 +51,10 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
         if i % 1000 == 0:
             print i, regret[i], avg_regret[i], arm, opt_arm_in_hindsight, exp_reward, factor, alpha, bandit.name(), flag
 
-    # if avg_regret[i] < best_avg_regret[i]:
-    #     best_avg_regret[:] = avg_regret[:]
-    #     filename_best_avg_regret = filename_plot_data + bandit.name() + str(flag)
-    #     np.save(filename_best_avg_regret, best_avg_regret)
+    if avg_regret[i] < best_avg_regret[i]:
+        best_avg_regret[:] = avg_regret[:]
+        filename_best_avg_regret = filename_plot_data + bandit.name() + str(flag)
+        np.save(filename_best_avg_regret, best_avg_regret)
 
     fp.write(bandit.name() + " regret = " + str(regret[i]) + " avg regret = " + str(avg_regret[i]) + " factor = " + str(
         factor) + " M = " + str(M) + " alpha = " + str(alpha) + "\n")

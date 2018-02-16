@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import time
 from readMNIST import read_MNIST
-
+from sklearn.preprocessing import normalize
 import create_syntheticdata
 from testClassificationBandit import run_recommender
 
@@ -19,13 +19,14 @@ def run_exp(X, Y, K, d):
     bn = 0
     narm = K
     T = N
-    num_bandits = 2
-    reward_type = "binary"
+    cov_mult = 0.0005
+    num_bandits = 4
+    reward_type = 'binary'
     filename_result = 'result_classification/result1.txt'
     # filename_result = 'results/result_independent_real.txt'
     # best_avg_regret = np.zeros((num_bandits,T), dtype=np.float)
     best_avg_regret = np.full((num_bandits, T), 99999999999)
-    filename_plot_data = 'classification_plot/1_best_avg_regret'
+    filename_plot_data = 'classification_plot/1_best_avg_regret_'
     fp = open(filename_result, 'a')
 
     flag = 1
@@ -55,8 +56,8 @@ def run_exp(X, Y, K, d):
 
             start_time = time.time()
             c = 0
-            for factor in range(25, 1030, 25):
-                bandit = OnlineBootstrap(B=20, narm=narm, d=d, reward_type=reward_type)
+            for factor in range(1, 102, 5):
+                bandit = OnlineBootstrap(B=20, narm=narm, d=d, reward_type=reward_type, cov_mult=cov_mult)
                 run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], T, X, Y, narm,
                                 d, M, filename_plot_data)
                 c += 1
@@ -75,8 +76,8 @@ def run_exp(X, Y, K, d):
             best_M = M
             c = 0
             start_time = time.time()
-            for factor in range(25, 1030, 25):
-                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=M)
+            for factor in range(1, 102, 5):
+                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=M, reward_type=reward_type, cov_mult=cov_mult)
                 r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], T, X, Y,
                                     narm, d, M, filename_plot_data)
                 c += 1
@@ -85,8 +86,8 @@ def run_exp(X, Y, K, d):
                     best_regret = r
                     best_factor = factor
 
-            for m in range(1, narm, 10):
-                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=U + d + 1, M=m)
+            for m in range(1, narm+1):
+                bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=m, reward_type=reward_type, cov_mult=cov_mult)
                 r = run_recommender(fp, flag, bandit, reward_type, best_factor, alpha, best_avg_regret[bn - 1][:], T, X,
                                     Y, narm, d, m, filename_plot_data)
                 c += 1
@@ -102,6 +103,7 @@ def run_exp(X, Y, K, d):
             fp.flush()
 
         elif bn == 4:
+            continue
             M = 0
             factor = 0
             start_time = time.time()
@@ -130,6 +132,8 @@ def main():
 
     X, _, Y = read_MNIST(trainImageFile, trainLabelFile, train=True)
     # XTest, _, yTest, _ = read_MNIST(testImageFile, testLabelFile, train=False)
+
+    X = normalize(X)
     run_exp(X, Y, K, d)
 
 

@@ -112,6 +112,7 @@ class LinUCB():
         return "LinUCB"
 
 
+# class UCBbin():
 
 class EpsGreedy():
     def __init__(self, epsilon, d, alpha):
@@ -174,7 +175,7 @@ class Random():
 
 
 class OnlineBootstrap():
-    def __init__(self, B=1, narm=10, d=10, reward_type='real'):
+    def __init__(self, B=1, narm=10, d=10, reward_type='real', cov_mult=1):
         self.B = B
         self.d = d
         self.narm = narm
@@ -182,7 +183,7 @@ class OnlineBootstrap():
         self.reward_type = reward_type
 
         mean = np.zeros((self.d))
-        cov = np.identity((self.d))
+        cov = cov_mult*np.identity((self.d))
 
         self.theta_all = []
         for i in range(self.narm):
@@ -263,7 +264,7 @@ class OnlineBootstrap():
 
 
 class OnlineCollaborativeBootstrap():
-    def __init__(self, B=1, narm=10, D=10, M=10, reward_type='real'):
+    def __init__(self, B=1, narm=10, D=10, M=10, reward_type='real', cov_mult=1):
         self.B = B
         self.D = D
         self.M = M
@@ -271,7 +272,7 @@ class OnlineCollaborativeBootstrap():
         self.reward_type = reward_type
 
         mean = np.zeros((self.D))
-        cov = np.identity((self.D))
+        cov = cov_mult*np.identity((self.D))
       
         self.theta_basis = []
         for i in range(self.M):          
@@ -283,7 +284,7 @@ class OnlineCollaborativeBootstrap():
         # print self.theta_all
 
         mean = np.zeros((self.M))
-        cov = np.identity((self.M))
+        cov = cov_mult*np.identity((self.M))
      
         self.Z = []
         for i in range(self.narm):
