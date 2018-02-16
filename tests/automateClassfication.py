@@ -19,7 +19,7 @@ def run_exp(X, Y, K, d):
     bn = 0
     narm = K
     T = N
-    cov_mult = 0.0005
+    cov_mult = 0.5
     num_bandits = 4
     reward_type = 'binary'
     filename_result = 'result_classification/result1.txt'
