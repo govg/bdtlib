@@ -167,7 +167,7 @@ class Random():
             # optarm = self.arm
         return optarm, 0
 
-    def update(self, context, reward, exp_reward, reward_type, factor):
+    def update(self, context, reward, exp_reward, reward_type, factor, Lambda=0.05, reg=False):
         return
 
     def name(self):
@@ -228,20 +228,26 @@ class OnlineBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward, reward_type, factor):
+    def update(self, context, reward, exp_reward, reward_type, factor, Lambda=0.05, reg=False):
         # print "here"
         for j in range(self.B):
             # p = np.random.poisson(lam=1)
             # for z in range(1,p+1):
             # eta = 1.0 / math.sqrt(z+1)
-            eta = 0.006
+            # eta = 0.08
+            eta = 1.0
             # self.l += 1
             # print eta
             # self.theta_all[self.selected_arm, j , :] += eta*(reward - exp_reward)*context / 400 # derivative of log-likelihood
             if reward_type == "real":
                 self.theta_all[self.selected_arm, j , :] += eta*derivative_real(reward, exp_reward, context, factor)
             else:
-                self.theta_all[self.selected_arm, j , :] += eta*derivative_binary(reward, exp_reward, context, factor)
+                self.theta_all[self.selected_arm, j, :] += eta * derivative_binary(reward, exp_reward, context,
+                                                                                   factor,
+                                                                                   w=self.theta_all[self.selected_arm,
+                                                                                     j, :],
+                                                                                   Lambda=Lambda,
+                                                                                   reg=reg)
 
         # print "arm pulled : " + str(self.selected_arm)
         # print self.theta_all
@@ -329,13 +335,13 @@ class OnlineCollaborativeBootstrap():
 
         return optarm, exp_rewards[0][optarm] 
 
-    def update(self, context, reward, exp_reward, reward_type, factor):
-        self.update_Z(context, reward, exp_reward, reward_type, factor)
-        self.update_theta(context, reward, exp_reward, reward_type, factor)
+    def update(self, context, reward, exp_reward, reward_type, factor, Lambda=0.05, reg=False):
+        self.update_Z(context, reward, exp_reward, reward_type, factor, Lambda, reg)
+        self.update_theta(context, reward, exp_reward, reward_type, factor, Lambda, reg)
         self.theta_all = np.array(np.matrix(self.Z)*np.matrix(self.theta_basis))
 
-    def update_Z(self, context, reward, exp_reward, reward_type, factor):
-        eta = 0.006
+    def update_Z(self, context, reward, exp_reward, reward_type, factor, Lambda=0.05, reg=False):
+        eta = 1.0
         modified_context = np.squeeze(np.array(np.matrix(self.theta_basis)*np.transpose(np.matrix(context))))
         # print np.transpose(np.matrix(context)).shape
         # print modified_context.shape
@@ -351,12 +357,15 @@ class OnlineCollaborativeBootstrap():
         if reward_type == "real":
             self.Z[self.selected_arm, : ] += eta*derivative_real(reward, exp_reward, modified_context, factor)
         else:
-            self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+            # self.Z[self.selected_arm, : ] += eta*derivative_binary(reward, exp_reward, modified_context, factor)
+            self.Z[self.selected_arm, :] += eta * derivative_binary(reward, exp_reward, modified_context, factor,
+                                                                    w=self.Z[self.selected_arm, :],
+                                                                    Lambda=Lambda,
+                                                                    reg=reg)
 
-
-    def update_theta(self, context, reward, exp_reward, reward_type, factor):
+    def update_theta(self, context, reward, exp_reward, reward_type, factor, Lambda=0.05, reg=False):
         for i in range(self.M):
-            eta = 0.006
+            eta = 1.0
             modified_context = np.array(self.Z[self.selected_arm][i]*context)
             exp_pseudo_reward = float(np.array(np.matrix(self.theta_basis[i,:])*np.matrix(modified_context).transpose()))
             # print np.matrix(self.Z[self.selected_arm, :])*np.matrix(self.theta_basis)*np.matrix(context).transpose()
@@ -376,8 +385,12 @@ class OnlineCollaborativeBootstrap():
                 #                                                 factor)
             else:
                 # self.theta_basis[i, : ] += eta*derivative_binary(pseudo_reward, exp_pseudo_reward, modified_context, factor)
-                self.theta_basis[i, :] += eta * derivative_binary(reward, exp_reward, modified_context,
-                                                                factor)
+                # self.theta_basis[i, :] += eta * derivative_binary(reward, exp_reward, modified_context,
+                #                                                 factor)
+                self.theta_basis[i, :] += eta * derivative_binary(reward, exp_reward, modified_context, factor,
+                                                                  w=self.theta_basis[i, :],
+                                                                  Lambda=Lambda,
+                                                                  reg=reg)
             
 
 

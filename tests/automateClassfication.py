@@ -19,8 +19,10 @@ def run_exp(X, Y, K, d):
     bn = 0
     narm = K
     T = N
-    cov_mult = 0.20
+    cov_mult = 0.35
     num_bandits = 3
+    Lambda = 0.01
+    reg = False
     reward_type = 'binary'
     filename_result = 'result_classification/result6.txt'
     # filename_result = 'results/result_independent_real.txt'
@@ -45,7 +47,7 @@ def run_exp(X, Y, K, d):
             for i in range(10):
                 bandit = Random(narm=narm)
                 run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], best_cum_regret[bn - 1][:], T, X, Y, narm,
-                                d, M, filename_avg_regret_data, filename_cum_regret_data)
+                                d, M, filename_avg_regret_data, filename_cum_regret_data, Lambda, reg)
             avg_duration = float((time.time() - start_time) / 10.0)
             fp.write('Avg Duration = ' + str(avg_duration) + '\n')
             fp.flush()
@@ -61,7 +63,7 @@ def run_exp(X, Y, K, d):
             for factor in range(5, 201, 5):
                 bandit = OnlineBootstrap(B=20, narm=narm, d=d, reward_type=reward_type, cov_mult=cov_mult)
                 run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], best_cum_regret[bn - 1][:], T, X, Y, narm,
-                                d, M, filename_avg_regret_data, filename_cum_regret_data)
+                                d, M, filename_avg_regret_data, filename_cum_regret_data, Lambda, reg)
                 c += 1
 
             avg_duration = float(1.0 * (time.time() - start_time) / c)
@@ -81,7 +83,7 @@ def run_exp(X, Y, K, d):
             for factor in range(5, 201, 5):
                 bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=M, reward_type=reward_type, cov_mult=cov_mult)
                 r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], best_cum_regret[bn - 1][:], T, X, Y,
-                                    narm, d, M, filename_avg_regret_data, filename_cum_regret_data)
+                                    narm, d, M, filename_avg_regret_data, filename_cum_regret_data, Lambda, reg)
                 c += 1
 
                 if r < best_regret:
@@ -91,7 +93,7 @@ def run_exp(X, Y, K, d):
             for m in range(1, narm+1):
                 bandit = OnlineCollaborativeBootstrap(B=1, narm=narm, D=d, M=m, reward_type=reward_type, cov_mult=cov_mult)
                 r = run_recommender(fp, flag, bandit, reward_type, best_factor, alpha, best_avg_regret[bn - 1][:], best_cum_regret[bn - 1][:], T, X,
-                                    Y, narm, d, m, filename_avg_regret_data, filename_cum_regret_data)
+                                    Y, narm, d, m, filename_avg_regret_data, filename_cum_regret_data, Lambda, reg)
                 c += 1
 
                 if r < best_regret:
@@ -115,7 +117,7 @@ def run_exp(X, Y, K, d):
                 # pass
                 bandit = LinUCB(alpha=alpha, d=d, sigma=1, narm=narm)
                 r = run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret[bn - 1][:], best_cum_regret[bn - 1][:], T, X, Y,
-                                    narm, d, M, filename_avg_regret_data, filename_cum_regret_data)
+                                    narm, d, M, filename_avg_regret_data, filename_cum_regret_data, Lambda, reg)
                 alpha += 1
                 c += 1
 

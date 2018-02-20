@@ -16,7 +16,7 @@ def calc_frobnorm(A, B):
 
 
 def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret, best_cum_regret, T, X, Y, narm, d, M,
-                    filename_avg_regret_data, filename_cum_regret_data):
+                    filename_avg_regret_data, filename_cum_regret_data, Lambda=0.05, reg=False):
 
     regret = np.zeros(T, dtype=np.float)
     avg_regret = np.zeros(T, dtype=np.float)
@@ -38,7 +38,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
         arm, exp_reward = bandit.choose(context)
         # print exp_reward
         try:
-            bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+            bandit.update(context, Y[i][arm], exp_reward, reward_type, factor, Lambda, reg)
         except:
             break
 
