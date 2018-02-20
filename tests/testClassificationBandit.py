@@ -53,7 +53,7 @@ def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regre
 
     if avg_regret[i] < best_avg_regret[i]:
         best_avg_regret[:] = avg_regret[:]
-        best_cum_regret[:] = regret[i]
+        best_cum_regret[:] = regret[:]
 
         filename_best_avg_regret = filename_avg_regret_data + bandit.name() + str(flag)
         np.save(filename_best_avg_regret, best_avg_regret)

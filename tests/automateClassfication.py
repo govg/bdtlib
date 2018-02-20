@@ -19,16 +19,16 @@ def run_exp(X, Y, K, d):
     bn = 0
     narm = K
     T = N
-    cov_mult = 0.25
+    cov_mult = 0.20
     num_bandits = 3
     reward_type = 'binary'
-    filename_result = 'result_classification/result5.txt'
+    filename_result = 'result_classification/result6.txt'
     # filename_result = 'results/result_independent_real.txt'
     # best_avg_regret = np.zeros((num_bandits,T), dtype=np.float)
     best_avg_regret = np.full((num_bandits, T), 99999999999.0)
     best_cum_regret = np.full((num_bandits, T), 99999999999.0)
-    filename_avg_regret_data = 'classification_plot/5_best_avg_regret_'
-    filename_cum_regret_data = 'classification_plot/5_best_cum_regret_'
+    filename_avg_regret_data = 'classification_plot/6_best_avg_regret_'
+    filename_cum_regret_data = 'classification_plot/6_best_cum_regret_'
     fp = open(filename_result, 'a')
 
     flag = 1
