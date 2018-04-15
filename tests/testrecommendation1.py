@@ -15,7 +15,7 @@ def calc_frobnorm(A,B):
 	return f
 
 
-def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, X, Y, narm, d, M):
+def run_recommender(fp, flag, bandit, reward_type, factor, alpha, best_avg_regret, T, X, Y, narm, d, M, filename_plot_data):
 	
 	bn = 0
 	bnum = 0
@@ -29,7 +29,7 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 	root_T = np.zeros(T, dtype=np.float)
 	lin_T = np.zeros(T, dtype=np.float)
 
-	
+	# print "in func"
 	
     # f = 50
   #   while f <= 1000:		
@@ -42,6 +42,7 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 		# frob_norm[0] = f
 		# sys.exit()
 	for i in range(0, T):
+		# print "in loop"
 		root_T[i] = 10000*math.sqrt(i+1)
 		lin_T[i] = 100*(i+1) 
 
@@ -55,10 +56,19 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 		# print "opt arm : " + str(opt_arm_in_hindsight)
 
 		if bandit.name() == "Online Bootstrap" or bandit.name() == "Online Collaborative Bootstrap":
-			if i >= 300:		
+			# print "abc"
+			if i >= 300:
+				# print i
+				# print "abc"
 				# Pull arm as per Online Bootstrap
 				arm, exp_reward = bandit.choose(context)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				try:
+					# print "here"
+					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				except:
+					# print "break"
+					break
+				
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 				# if i % 1000 == 0:
 				# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
@@ -70,9 +80,14 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 					regret[i] = (Y[i][opt_arm_in_hindsight] - Y[i][arm]) + regret[i-1]
 
 			else:
+				# print i
 				arm, exp_reward = bandit.get_random_arm(context)
 				# exp_reward = bandit.get_exp_reward(context, arm)
-				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				try:
+					bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+				except:
+					# print "break"
+					break
 				# bandit.update(context, Y[i][arm], Y[i][opt_arm_in_hindsight])
 
 				if i == 0:
@@ -82,8 +97,12 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 			
 
 		else:
+			# print i
 			arm, exp_reward = bandit.choose(context)
-			bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+			try:
+				bandit.update(context, Y[i][arm], exp_reward, reward_type, factor)
+			except:
+				break
 			# if i % 1000 == 0:
 			# 	print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, bandit.name()
 
@@ -94,15 +113,16 @@ def run_recommender(fp, bandit, reward_type, factor, alpha, best_avg_regret, T, 
 
 		avg_regret[i] = regret[i] / (i+1)
 		if i % 1000 == 0:
-			print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, alpha, bandit.name()
+			print i, regret[i], avg_regret[i],  Y[i][arm], exp_reward, factor, alpha, bandit.name(), flag
 
-	if avg_regret[i] > best_avg_regret[i]:
+	if avg_regret[i] < best_avg_regret[i]:
 		best_avg_regret[:] = avg_regret[:]
-		filename_best_avg_regret = 'plots/best_avg_regret_' + bandit.name() 
+		filename_best_avg_regret = filename_plot_data + bandit.name() + str(flag)
 		np.save(filename_best_avg_regret, best_avg_regret)
 
 	fp.write(bandit.name() + " regret = " + str(regret[i]) + " avg regret = " + str(avg_regret[i]) + " factor = " + str(factor) + " M = " + str(M) + " alpha = " + str(alpha) + "\n")
-
+	fp.flush()
+	
 	return best_avg_regret[i]
 	# fp.flush()			
     
