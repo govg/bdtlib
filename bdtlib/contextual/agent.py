@@ -141,7 +141,7 @@ class EpsGreedy():
 
     def update(self, context, reward):
         x = np.matrix(context)
-        self.A = self.A + x.tranpose()*x
+        self.A = self.A + x.transpose()*x
         self.b = self.b + (reward*x).transpose()
         self.Ainv = np.linalg.inv(self.A)
         self.t = self.Ainv*self.b
@@ -151,15 +151,15 @@ class EpsGreedy():
         return "Epsilon Greedy"
 
 class OnlineBootstrap():
-    def __init__(self, B=1, narm=10, d=10):     
+    def __init__(self, B=1, narm=10, d=10):
         self.B = B
         self.d = d
         self.narm = narm
-        self.all_arm_feats = np.random.randn(self.narm, self.B, self.d)  # Initialize all arm features 
+        self.all_arm_feats = np.random.randn(self.narm, self.B, self.d)  # Initialize all arm features
 
-    
-    def choose(self, contexts): 
-        selected_arm_feats = np.array((narm, self.d))
+
+    def choose(self, contexts):
+        selected_arm_feats = np.zeros((self.narm, self.d))
 
         # Sample arm feature for each arm
         for k in range(self.narm):
@@ -173,11 +173,7 @@ class OnlineBootstrap():
         return optarm
 
     def update(self, selected_arm, context, reward):
-        for j in range(self.B):
-            p = np.random.poisson(lam=1)
-            for z in range(1,p+1):
-                eta = 1.0 / (math.sqrt(z)+1)
-                self.all_arm_feats[selected_arm, j , :] += eta* # derivative of log-likelihood
+        raise NotImplementedError("OnlineBootstrap.update is not implemented")
 
 
 

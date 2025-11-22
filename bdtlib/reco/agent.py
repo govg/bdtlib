@@ -144,7 +144,7 @@ class EpsGreedy():
 
     def update(self, context, reward):
         x = np.matrix(context)
-        self.A = self.A + x.tranpose()*x
+        self.A = self.A + x.transpose()*x
         self.b = self.b + (reward*x).transpose()
         self.Ainv = np.linalg.inv(self.A)
         self.t = self.Ainv*self.b
